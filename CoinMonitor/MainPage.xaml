@@ -1,0 +1,19 @@
+﻿<Page
+    x:Class="CoinMonitor.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CoinMonitor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock Name="BtcPriceTextBlock" Text="{x:Bind Path=_coinPriceModel.Price, Mode=OneWay}"/>
+        <Button  Click="ButtonBase_OnClick" Content="Get BTC price"/>
+        <controls:DataGrid x:Name="MonitoringDataGrid" Width="1500" Height="500" ItemsSource="{x:Bind Path=Coins.Values, Mode=OneWay}">
+
+        </controls:DataGrid>
+    </StackPanel>
+</Page>

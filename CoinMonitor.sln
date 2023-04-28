@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinMonitor", "CoinMonitor\CoinMonitor.csproj", "{ED7316E3-7D4E-4725-B0F0-44F8D7EE6218}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ED7316E3-7D4E-4725-B0F0-44F8D7EE6218}.Debug|x64.ActiveCfg = Debug|x64
+		{ED7316E3-7D4E-4725-B0F0-44F8D7EE6218}.Debug|x64.Build.0 = Debug|x64
+		{ED7316E3-7D4E-4725-B0F0-44F8D7EE6218}.Debug|x64.Deploy.0 = Debug|x64
+		{ED7316E3-7D4E-4725-B0F0-44F8D7EE6218}.Release|x64.ActiveCfg = Release|x64
+		{ED7316E3-7D4E-4725-B0F0-44F8D7EE6218}.Release|x64.Build.0 = Release|x64
+		{ED7316E3-7D4E-4725-B0F0-44F8D7EE6218}.Release|x64.Deploy.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC8E4C9C-0F19-4633-96E7-E39008FD127C}
+	EndGlobalSection
+EndGlobal
