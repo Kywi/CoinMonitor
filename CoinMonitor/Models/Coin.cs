@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using ObservableDictionary;
 
 namespace CoinMonitor.Models
 {
@@ -9,14 +10,14 @@ namespace CoinMonitor.Models
         public event PropertyChangedEventHandler PropertyChanged;
 
         private string _name = "";
-        private double _priceBinance = 0.0;
-        private double _priceWhiteBit = 0.0;
 
-        public Coin(string name, double priceBinance, double priceWhiteBit)
+        private ObservableStringDictionary<decimal> _coinsPrices = new ObservableStringDictionary<decimal>();
+
+        public Coin(string name)
         {
             Name = name;
-            PriceBinance = priceBinance;
-            PriceWhiteBit = priceWhiteBit;
+            _coinsPrices["Binance"] = 0;
+            _coinsPrices["WhiteBit"] = 0;
         }
 
         public string Name
@@ -25,16 +26,10 @@ namespace CoinMonitor.Models
             set => SetField(ref _name, value);
         }
 
-        public double PriceBinance
+        public ObservableStringDictionary<decimal> CoinPrices
         {
-            get => _priceBinance;
-            set => SetField(ref _priceBinance, value);
-        }
-
-        public double PriceWhiteBit
-        {
-            get => _priceWhiteBit;
-            set => SetField(ref _priceWhiteBit, value);
+            get => _coinsPrices;
+            set => SetField(ref _coinsPrices, value);
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

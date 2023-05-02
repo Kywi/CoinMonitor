@@ -9,11 +9,13 @@
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Name="BtcPriceTextBlock" Text="{x:Bind Path=_coinPriceModel.Price, Mode=OneWay}"/>
-        <Button  Click="ButtonBase_OnClick" Content="Get BTC price"/>
-        <controls:DataGrid x:Name="MonitoringDataGrid" Width="1500" Height="500" ItemsSource="{x:Bind Path=Coins.Values, Mode=OneWay}">
-
+    <Grid >
+        <controls:DataGrid x:Name="MonitoringDataGrid" ItemsSource="{x:Bind Path=Coins.Values, Mode=OneWay}" AutoGenerateColumns="False">
+            <controls:DataGrid.Columns>
+                <controls:DataGridTextColumn Header="Coin name" Binding="{Binding Name}"/>
+                <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinPrices[Binance]}"/>
+                <controls:DataGridTextColumn Header="WhiteBit" Binding="{Binding CoinPrices[WhiteBit]}"/>
+            </controls:DataGrid.Columns>
         </controls:DataGrid>
-    </StackPanel>
+    </Grid>
 </Page>
