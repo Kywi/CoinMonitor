@@ -51,12 +51,15 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Connections\Binance\BinanceTickerDto.cs" />
+    <Compile Include="Connections\Binance\TickerDto.cs" />
     <Compile Include="Connections\Binance\BinanceWebSocketManager.cs" />
-    <Compile Include="Connections\Binance\BinanceWebSocketSubscriptionDto.cs" />
+    <Compile Include="Connections\Binance\WebSocketSubscriptionDto.cs" />
     <Compile Include="Connections\ConnectionsManager.cs" />
     <Compile Include="Connections\IWebSocketManager.cs" />
     <Compile Include="Connections\PriceChangedEventArgs.cs" />
+    <Compile Include="Connections\WhiteBit\TickerDto.cs" />
+    <Compile Include="Connections\WhiteBit\WebSocketSubscription.cs" />
+    <Compile Include="Connections\WhiteBit\WhiteBitWebSocketManager.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

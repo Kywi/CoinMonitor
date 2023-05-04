@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace CoinMonitor.Connections.Binance
+namespace CoinMonitor.Connections.WhiteBit
 {
-    public class BinanceWebSocketSubscriptionDto
+    public class WebSocketSubscription
     {
         [JsonProperty("method")]
         public string Method { get; set; }

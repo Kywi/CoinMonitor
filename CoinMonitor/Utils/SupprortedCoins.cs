@@ -9,9 +9,8 @@ namespace CoinMonitor.Utils
         {
             return new List<string>
             {
-                "btcusdt",
-                "ethusdt",
-                "alphausdt"
+                "btc",
+                "eth",
             };
         }
     }

@@ -2,7 +2,7 @@
 
 namespace CoinMonitor.Connections.Binance
 {
-    public class BinanceTickerDto
+    public class TickerDto
     {
         [JsonProperty("s")]
         public string Symbol { get; set; }

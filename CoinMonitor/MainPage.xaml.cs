@@ -21,21 +21,20 @@ namespace CoinMonitor
     {
         public ObservableConcurrentDictionary<string, Coin> Coins = new ObservableConcurrentDictionary<string, Coin>();
 
-        private ConnectionsManager _connectionsManager;
+        private readonly ConnectionsManager _connectionsManager;
 
         public MainPage()
         {
             this.InitializeComponent();
-            _connectionsManager = new ConnectionsManager(SupprortedCoins.GetSupportedCoins(), PriceUpdate);
 
-            Coins["BTC"] = new Coin("BTC");
-            Coins["ETH"] = new Coin("ETH");
-            Coins["ALPHA"] = new Coin("ALPHA");
+            _connectionsManager = new ConnectionsManager(SupprortedCoins.GetSupportedCoins(), PriceUpdate);
+            foreach (var coinName in SupprortedCoins.GetSupportedCoins())
+                Coins[coinName.ToUpper()] = new Coin(coinName.ToUpper());
         }
 
         private void PriceUpdate(object sender, PriceChangedEventArgs e)
         {
-            Coins[e.Symbol.Substring(0, e.Symbol.Length - 4)].CoinPrices[e.ExcgangeName] = e.Price;
+            Coins[e.Symbol].CoinPrices[e.ExcgangeName] = e.Price;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
