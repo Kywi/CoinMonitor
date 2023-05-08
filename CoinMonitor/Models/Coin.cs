@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Windows.UI;
+using Windows.UI.Xaml.Media;
 using ObservableDictionary;
+using Color = System.Drawing.Color;
 
 namespace CoinMonitor.Models
 {
@@ -17,6 +21,7 @@ namespace CoinMonitor.Models
         private ObservableStringDictionary<decimal> _coinsPricesView = new ObservableStringDictionary<decimal>();
 
         private ObservableStringDictionary<decimal> _coinsPrices = new ObservableStringDictionary<decimal>();
+        private ObservableStringDictionary<Color> _colors = new ObservableStringDictionary<Color>();
 
         public Coin(string name)
         {
@@ -28,6 +33,10 @@ namespace CoinMonitor.Models
             _coinsPricesView["Binance"] = 0;
             _coinsPricesView["WhiteBit"] = 0;
             _coinsPricesView["Bybit"] = 0;
+
+            _colors["Binance"] = Color.Black;
+            _colors["WhiteBit"] = Color.Black;
+            _colors["Bybit"] = Color.Black;
 
             _coinsPrices.DictionaryChanged += CoinsPricesOnDictionaryChanged;
         }
@@ -43,11 +52,11 @@ namespace CoinMonitor.Models
                     foreach (var coin in _coinsPricesView.Keys.ToList())
                     {
                         if (coin != "Binance")
-                            _coinsPricesView[coin] = CalculatePercentage((decimal)e.AddedItem, _coinsPrices[coin]);
+                            _coinsPricesView[coin] = CalculatePercentage((decimal)e.AddedItem, _coinsPrices[coin], coin);
                     }
                 }
                 else
-                    _coinsPricesView[(string)e.AddedKey] = CalculatePercentage(_coinsPrices["Binance"], (decimal)e.AddedItem);
+                    _coinsPricesView[(string)e.AddedKey] = CalculatePercentage(_coinsPrices["Binance"], (decimal)e.AddedItem, (string)e.AddedKey);
             }
         }
 
@@ -69,6 +78,13 @@ namespace CoinMonitor.Models
             set => SetField(ref _coinsPricesView, value);
         }
 
+        public ObservableStringDictionary<Color> Colors
+        {
+            get => _colors;
+            set => SetField(ref _colors, value);
+        }
+
+
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -84,10 +100,19 @@ namespace CoinMonitor.Models
             return true;
         }
 
-        private static int CalculatePercentage(decimal price, decimal coin)
+        private int CalculatePercentage(decimal price, decimal coin, string exchangeName)
         {
             if (price == 0 || coin == 0) return 0;
-            return (int)(coin * 100 / price) - 100;
+            var result = (int)(coin * 100 / price) - 100;
+
+            if (result > 0)
+                _colors[exchangeName] = Color.Green;
+            else if( result == 0)
+                _colors[exchangeName] = Color.Black;
+            else
+                _colors[exchangeName] = Color.Red;
+
+            return result;
         }
     }
 }
