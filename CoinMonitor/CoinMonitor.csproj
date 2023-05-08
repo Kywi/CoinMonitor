@@ -54,6 +54,9 @@
     <Compile Include="Connections\Binance\TickerDto.cs" />
     <Compile Include="Connections\Binance\BinanceWebSocketManager.cs" />
     <Compile Include="Connections\Binance\WebSocketSubscriptionDto.cs" />
+    <Compile Include="Connections\Bybit\BybitWebSocketManager.cs" />
+    <Compile Include="Connections\Bybit\TickerDto.cs" />
+    <Compile Include="Connections\Bybit\WebSocketSubscriptionDto.cs" />
     <Compile Include="Connections\ConnectionsManager.cs" />
     <Compile Include="Connections\IWebSocketManager.cs" />
     <Compile Include="Connections\PriceChangedEventArgs.cs" />

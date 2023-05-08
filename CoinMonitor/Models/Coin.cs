@@ -18,6 +18,7 @@ namespace CoinMonitor.Models
             Name = name;
             _coinsPrices["Binance"] = 0;
             _coinsPrices["WhiteBit"] = 0;
+            _coinsPrices["Bybit"] = 0;
         }
 
         public string Name

@@ -26,6 +26,7 @@ namespace CoinMonitor.Connections.Binance
             _socket = new ClientWebSocket();
             _baseUrl = "wss://stream.binance.com:9443/ws";
             _symbols = new List<string>();
+
             foreach (var symbol in symbols)
                 _symbols.Add(symbol + "usdt");
         }

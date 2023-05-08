@@ -34,7 +34,7 @@ namespace CoinMonitor
 
         private void PriceUpdate(object sender, PriceChangedEventArgs e)
         {
-            Coins[e.Symbol].CoinPrices[e.ExcgangeName] = e.Price;
+            Coins[e.Symbol].CoinPrices[e.ExchangeName] = e.Price;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

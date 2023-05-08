@@ -15,6 +15,7 @@
                 <controls:DataGridTextColumn Header="Coin name" Binding="{Binding Name}"/>
                 <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinPrices[Binance]}"/>
                 <controls:DataGridTextColumn Header="WhiteBit" Binding="{Binding CoinPrices[WhiteBit]}"/>
+                <controls:DataGridTextColumn Header="Bybit" Binding="{Binding CoinPrices[Bybit]}"/>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>

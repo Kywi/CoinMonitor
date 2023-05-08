@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using CoinMonitor.Connections;
-using CoinMonitor.Connections.Binance;
+using CoinMonitor.Connections.Bybit;
 using Newtonsoft.Json;
 
-namespace CoinMonitor.Connections.WhiteBit
+namespace CoinMonitor.Connections.Bybit
 {
-    public class WhiteBitWebSocketManager : IWebSocketManager
+    public class BybitWebSocketManager : IWebSocketManager
     {
         private readonly ClientWebSocket _socket;
         private readonly string _baseUrl;
@@ -21,25 +17,28 @@ namespace CoinMonitor.Connections.WhiteBit
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
 
-        public WhiteBitWebSocketManager(List<string> symbols)
+        public BybitWebSocketManager(List<string> symbols)
         {
             _socket = new ClientWebSocket();
-            _baseUrl = "wss://api.whitebit.com/ws";
+            _baseUrl =
+                "wss://stream.bybit.com/spot/public/v3"; //"wss://stream.bybit.com/v5/public/spot"; wss://stream.bybit.com/realtime
             _symbols = new List<string>();
 
             foreach (var symbol in symbols)
-                _symbols.Add(symbol.ToUpper() + "_USDT");
+                _symbols.Add("tickers." + symbol.ToUpper() + "USDT");
         }
+
 
         public async Task StartAsync()
         {
             await _socket.ConnectAsync(new Uri(_baseUrl), CancellationToken.None);
 
-            var subscription = new WebSocketSubscription
+            var subscription = new WebSocketSubscriptionDto
             {
-                Method = "lastprice_subscribe",
+                Id = 1,
+                Operation = "subscribe",
                 Params = _symbols,
-                Id = 1
+
             };
 
             var json = JsonConvert.SerializeObject(subscription);
@@ -79,12 +78,13 @@ namespace CoinMonitor.Connections.WhiteBit
                         throw;
                     }
 
-                    if (update?.Params == null)
+                    if (update?.Data == null)
                         continue;
 
-                    var coinName = update.Params[0].Substring(0, update.Params[0].Length - 5);
+                    var tradingPair = update.Data.TradingPair;
+                    var coinName = tradingPair.Substring(0, tradingPair.Length - 4);
                     PriceUpdate?.Invoke(this,
-                        new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Params[1]), "WhiteBit"));
+                        new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Data.OpenPrice), "Bybit"));
                 }
             }
         }
