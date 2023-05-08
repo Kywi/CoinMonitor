@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using ObservableDictionary;
 
@@ -11,6 +14,8 @@ namespace CoinMonitor.Models
 
         private string _name = "";
 
+        private ObservableStringDictionary<decimal> _coinsPricesView = new ObservableStringDictionary<decimal>();
+
         private ObservableStringDictionary<decimal> _coinsPrices = new ObservableStringDictionary<decimal>();
 
         public Coin(string name)
@@ -19,6 +24,31 @@ namespace CoinMonitor.Models
             _coinsPrices["Binance"] = 0;
             _coinsPrices["WhiteBit"] = 0;
             _coinsPrices["Bybit"] = 0;
+
+            _coinsPricesView["Binance"] = 0;
+            _coinsPricesView["WhiteBit"] = 0;
+            _coinsPricesView["Bybit"] = 0;
+
+            _coinsPrices.DictionaryChanged += CoinsPricesOnDictionaryChanged;
+        }
+
+        private void CoinsPricesOnDictionaryChanged(object sender, NotifyDictionaryChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                if ((string)e.AddedKey == "Binance")
+                {
+                    _coinsPricesView["Binance"] = (decimal)e.AddedItem;
+
+                    foreach (var coin in _coinsPricesView.Keys.ToList())
+                    {
+                        if (coin != "Binance")
+                            _coinsPricesView[coin] = CalculatePercentage((decimal)e.AddedItem, _coinsPrices[coin]);
+                    }
+                }
+                else
+                    _coinsPricesView[(string)e.AddedKey] = CalculatePercentage(_coinsPrices["Binance"], (decimal)e.AddedItem);
+            }
         }
 
         public string Name
@@ -31,6 +61,12 @@ namespace CoinMonitor.Models
         {
             get => _coinsPrices;
             set => SetField(ref _coinsPrices, value);
+        }
+
+        public ObservableStringDictionary<decimal> CoinsPricesView
+        {
+            get => _coinsPricesView;
+            set => SetField(ref _coinsPricesView, value);
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -46,6 +82,12 @@ namespace CoinMonitor.Models
             field = value;
             OnPropertyChanged(propertyName);
             return true;
+        }
+
+        private static int CalculatePercentage(decimal price, decimal coin)
+        {
+            if (price == 0 || coin == 0) return 0;
+            return (int)(coin * 100 / price) - 100;
         }
     }
 }

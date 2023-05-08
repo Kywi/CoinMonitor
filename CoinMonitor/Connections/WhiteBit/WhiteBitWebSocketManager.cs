@@ -76,7 +76,7 @@ namespace CoinMonitor.Connections.WhiteBit
                     catch (Exception e)
                     {
                         Console.WriteLine(e);
-                        throw;
+                        continue;
                     }
 
                     if (update?.Params == null)

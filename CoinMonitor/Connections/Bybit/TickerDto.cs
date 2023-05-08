@@ -7,8 +7,8 @@ namespace CoinMonitor.Connections.Bybit
         [JsonProperty("s")]
         public string TradingPair { get; set; }
 
-        [JsonProperty("o")]
-        public decimal OpenPrice { get; set; }
+        [JsonProperty("c")]
+        public decimal ClosePrice { get; set; }
     }
 
     public class TickerDto

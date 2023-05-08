@@ -71,7 +71,16 @@ namespace CoinMonitor.Connections.Binance
                 else
                 {
                     var json = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    var update = JsonConvert.DeserializeObject<TickerDto>(json);
+                    TickerDto update;
+                    try
+                    {
+                        update = JsonConvert.DeserializeObject<TickerDto>(json);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        continue;
+                    }
 
                     if (update?.Symbol != null)
                         PriceUpdate?.Invoke(this, new PriceChangedEventArgs(update.Symbol.Substring(0, update.Symbol.Length - 4), update.Price, "Binance"));

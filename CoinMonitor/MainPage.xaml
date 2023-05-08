@@ -13,9 +13,9 @@
         <controls:DataGrid x:Name="MonitoringDataGrid" ItemsSource="{x:Bind Path=Coins.Values, Mode=OneWay}" AutoGenerateColumns="False">
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Coin name" Binding="{Binding Name}"/>
-                <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinPrices[Binance]}"/>
-                <controls:DataGridTextColumn Header="WhiteBit" Binding="{Binding CoinPrices[WhiteBit]}"/>
-                <controls:DataGridTextColumn Header="Bybit" Binding="{Binding CoinPrices[Bybit]}"/>
+                <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinsPricesView[Binance]}"/>
+                <controls:DataGridTextColumn Header="WhiteBit" Binding="{Binding CoinsPricesView[WhiteBit]}"/>
+                <controls:DataGridTextColumn Header="Bybit" Binding="{Binding CoinsPricesView[Bybit]}"/>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>
