@@ -25,11 +25,13 @@ namespace CoinMonitor
 
         public MainPage()
         {
+            foreach (var coinName in SupprortedCoins.GetSupportedCoins())
+                Coins[coinName.ToUpper()] = new Coin(coinName.ToUpper());
+
             this.InitializeComponent();
 
             _connectionsManager = new ConnectionsManager(SupprortedCoins.GetSupportedCoins(), PriceUpdate);
-            foreach (var coinName in SupprortedCoins.GetSupportedCoins())
-                Coins[coinName.ToUpper()] = new Coin(coinName.ToUpper());
+
         }
 
         private void PriceUpdate(object sender, PriceChangedEventArgs e)

@@ -35,20 +35,19 @@ namespace CoinMonitor.Connections.Binance
         {
             await _socket.ConnectAsync(new Uri(_baseUrl), CancellationToken.None);
 
-            foreach (var symbol in _symbols)
+            var requestParams = _symbols.Select(symbol => $"{symbol.ToLower()}@ticker").ToList();
+
+            var subscription = new WebSocketSubscriptionDto
             {
-                var subscription = new WebSocketSubscriptionDto
-                {
-                    Method = "SUBSCRIBE",
-                    Params = new List<string> { $"{symbol.ToLower()}@ticker" },
-                    Id = 1
-                };
+                Method = "SUBSCRIBE",
+                Params = requestParams,
+                Id = 1
+            };
 
-                var json = JsonConvert.SerializeObject(subscription);
-                var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
-                await _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
-            }
-
+            var json = JsonConvert.SerializeObject(subscription);
+            var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
+            await _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+            
             await ReceiveAsync();
         }
 

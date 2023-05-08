@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:models="using:CoinMonitor.Models"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid >
@@ -14,8 +15,22 @@
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Coin name" Binding="{Binding Name}"/>
                 <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinsPricesView[Binance]}"/>
-                <controls:DataGridTextColumn Header="WhiteBit" Binding="{Binding CoinsPricesView[WhiteBit]}"/>
-                <controls:DataGridTextColumn Header="Bybit" Binding="{Binding CoinsPricesView[Bybit]}"/>
+                <controls:DataGridTemplateColumn Header="Bybit" >
+                    <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding CoinsPricesView[Bybit]}" Foreground="{Binding Colors[Bybit]}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            </TextBlock>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                </controls:DataGridTemplateColumn>
+                <controls:DataGridTemplateColumn Header="WhiteBit" >
+                    <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding CoinsPricesView[WhiteBit]}" Foreground="{Binding Colors[WhiteBit]}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            </TextBlock>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                </controls:DataGridTemplateColumn>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>
