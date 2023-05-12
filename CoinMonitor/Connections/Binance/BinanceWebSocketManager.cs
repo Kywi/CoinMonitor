@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using CoinMonitor.Connections;
-using CoinMonitor.Connections.Binance;
 using Newtonsoft.Json;
+using CoinMonitor.Utils;
+using System.IO;
 
 namespace CoinMonitor.Connections.Binance
 {
@@ -17,25 +14,20 @@ namespace CoinMonitor.Connections.Binance
     {
         private readonly ClientWebSocket _socket;
         private readonly string _baseUrl;
-        private readonly List<string> _symbols;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
 
-        public BinanceWebSocketManager(List<string> symbols)
+        public BinanceWebSocketManager()
         {
             _socket = new ClientWebSocket();
             _baseUrl = "wss://stream.binance.com:9443/ws";
-            _symbols = new List<string>();
-
-            foreach (var symbol in symbols)
-                _symbols.Add(symbol + "usdt");
         }
 
         public async Task StartAsync()
         {
-            await _socket.ConnectAsync(new Uri(_baseUrl), CancellationToken.None);
+            var requestParams = (await SupprortedCoins.GetSupportedCoinsForBinance()).Select(symbol => $"{symbol.ToLower()}usdt@ticker").ToList();
 
-            var requestParams = _symbols.Select(symbol => $"{symbol.ToLower()}@ticker").ToList();
+            await _socket.ConnectAsync(new Uri(_baseUrl), CancellationToken.None);
 
             var subscription = new WebSocketSubscriptionDto
             {
@@ -47,7 +39,7 @@ namespace CoinMonitor.Connections.Binance
             var json = JsonConvert.SerializeObject(subscription);
             var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
             await _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
-            
+
             await ReceiveAsync();
         }
 
@@ -59,17 +51,25 @@ namespace CoinMonitor.Connections.Binance
 
         private async Task ReceiveAsync()
         {
-            var buffer = new byte[1024 * 4];
-
             while (_socket.State == WebSocketState.Open)
             {
-                var result = await _socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
+                using var ms = new MemoryStream();
+                WebSocketReceiveResult result;
+                do
+                {
+                    var messageBuffer = WebSocket.CreateClientBuffer(1024 * 4, 16);
+                    result = await _socket.ReceiveAsync(messageBuffer, CancellationToken.None);
+                    ms.Write(messageBuffer.Array, messageBuffer.Offset, result.Count);
+                } while (!result.EndOfMessage);
+                    
                 if (result.MessageType == WebSocketMessageType.Close)
                     await StopAsync();
                 else
                 {
-                    var json = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    if (!result.EndOfMessage)
+                        continue;
+
+                    var json = Encoding.UTF8.GetString(ms.ToArray());
                     TickerDto update;
                     try
                     {
@@ -77,12 +77,14 @@ namespace CoinMonitor.Connections.Binance
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        Console.WriteLine(e.ToString());
                         continue;
                     }
 
                     if (update?.Symbol != null)
-                        PriceUpdate?.Invoke(this, new PriceChangedEventArgs(update.Symbol.Substring(0, update.Symbol.Length - 4), update.Price, "Binance"));
+                        PriceUpdate?.Invoke(this,
+                            new PriceChangedEventArgs(update.Symbol.Substring(0, update.Symbol.Length - 4),
+                                update.Price, "Binance"));
                 }
             }
         }

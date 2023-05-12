@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CoinMonitor.Connections.Bybit;
+using System.Timers;
+using CoinMonitor.Utils;
 using Newtonsoft.Json;
 
 namespace CoinMonitor.Connections.Bybit
@@ -13,37 +15,44 @@ namespace CoinMonitor.Connections.Bybit
     {
         private readonly ClientWebSocket _socket;
         private readonly string _baseUrl;
-        private readonly List<string> _symbols;
+        private readonly System.Timers.Timer _timer;
+        private bool _needPing = false;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
 
-        public BybitWebSocketManager(List<string> symbols)
+        public BybitWebSocketManager()
         {
+            _timer = new System.Timers.Timer(20000);
+            _timer.AutoReset = true;
+            _timer.Elapsed += TimerOnElapsed;
             _socket = new ClientWebSocket();
-            _baseUrl =
-                "wss://stream.bybit.com/spot/public/v3"; //"wss://stream.bybit.com/v5/public/spot"; wss://stream.bybit.com/realtime
-            _symbols = new List<string>();
-
-            foreach (var symbol in symbols)
-                _symbols.Add("tickers." + symbol.ToUpper() + "USDT");
+            _baseUrl = "wss://stream.bybit.com/v5/public/spot";
         }
 
+        private void TimerOnElapsed(object sender, ElapsedEventArgs e)
+        {
+            _needPing = true;
+        }
 
         public async Task StartAsync()
         {
+            var paramsForRequests = SupprortedCoins.SplitList((await SupprortedCoins.GetSupportedCoinsForByBit()).Select(symbol => $"tickers.{symbol.ToUpper()}USDT").ToList(), 10);
+
             await _socket.ConnectAsync(new Uri(_baseUrl), CancellationToken.None);
-
-            var subscription = new WebSocketSubscriptionDto
+            foreach (var paramsForRequest in paramsForRequests)
             {
-                Id = 1,
-                Operation = "subscribe",
-                Params = _symbols,
+                var subscription = new WebSocketSubscriptionDto
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Operation = "subscribe",
+                    Parameters = paramsForRequest.ToArray(),
+                };
 
-            };
-
-            var json = JsonConvert.SerializeObject(subscription);
-            var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
-            await _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                var json = JsonConvert.SerializeObject(subscription);
+                var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
+                Thread.Sleep(200);
+                await _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+            }
 
             await ReceiveAsync();
         }
@@ -56,17 +65,29 @@ namespace CoinMonitor.Connections.Bybit
 
         private async Task ReceiveAsync()
         {
-            var buffer = new byte[1024 * 4];
-
+            _timer.Start();
             while (_socket.State == WebSocketState.Open)
             {
-                var result = await _socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                using var ms = new MemoryStream();
+                WebSocketReceiveResult result;
+                do
+                {
+                    var messageBuffer = WebSocket.CreateClientBuffer(1024 * 4, 16);
+                    result = await _socket.ReceiveAsync(messageBuffer, CancellationToken.None);
+                    ms.Write(messageBuffer.Array, messageBuffer.Offset, result.Count);
+                } while (!result.EndOfMessage);
+
+                if (_needPing)
+                    SendPing();
 
                 if (result.MessageType == WebSocketMessageType.Close)
                     await StopAsync();
                 else
                 {
-                    var json = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    if (!result.EndOfMessage)
+                        continue;
+
+                    var json = Encoding.UTF8.GetString(ms.ToArray());
                     TickerDto update;
                     try
                     {
@@ -74,8 +95,8 @@ namespace CoinMonitor.Connections.Bybit
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
-                        throw;
+                        Console.WriteLine(e.ToString());
+                        continue;
                     }
 
                     if (update?.Data == null)
@@ -87,6 +108,18 @@ namespace CoinMonitor.Connections.Bybit
                         new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Data.ClosePrice), "Bybit"));
                 }
             }
+        }
+
+        private async void SendPing()
+        {
+            _needPing = false;
+
+            var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new
+            {
+                op = "ping",
+            })));
+
+            await _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
         }
     }
 }

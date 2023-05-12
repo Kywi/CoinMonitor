@@ -4,10 +4,10 @@ namespace CoinMonitor.Connections.Bybit
 {
     public class DataDto
     {
-        [JsonProperty("s")]
+        [JsonProperty("symbol")]
         public string TradingPair { get; set; }
 
-        [JsonProperty("c")]
+        [JsonProperty("lastPrice")]
         public decimal ClosePrice { get; set; }
     }
 

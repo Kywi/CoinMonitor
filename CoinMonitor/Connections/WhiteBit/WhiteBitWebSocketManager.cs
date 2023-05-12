@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using CoinMonitor.Connections;
-using CoinMonitor.Connections.Binance;
+using CoinMonitor.Utils;
 using Newtonsoft.Json;
 
 namespace CoinMonitor.Connections.WhiteBit
@@ -17,18 +15,13 @@ namespace CoinMonitor.Connections.WhiteBit
     {
         private readonly ClientWebSocket _socket;
         private readonly string _baseUrl;
-        private readonly List<string> _symbols;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
 
-        public WhiteBitWebSocketManager(List<string> symbols)
+        public WhiteBitWebSocketManager()
         {
             _socket = new ClientWebSocket();
             _baseUrl = "wss://api.whitebit.com/ws";
-            _symbols = new List<string>();
-
-            foreach (var symbol in symbols)
-                _symbols.Add(symbol.ToUpper() + "_USDT");
         }
 
         public async Task StartAsync()
@@ -38,12 +31,13 @@ namespace CoinMonitor.Connections.WhiteBit
             var subscription = new WebSocketSubscription
             {
                 Method = "lastprice_subscribe",
-                Params = _symbols,
+                Params = (await SupprortedCoins.GetSupportedCoinsForWhiteBit()).Select(symbol => $"{symbol.ToUpper()}_USDT").ToList(),
                 Id = 1
             };
 
             var json = JsonConvert.SerializeObject(subscription);
             var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(json));
+            Thread.Sleep(200);
             await _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
 
             await ReceiveAsync();
@@ -57,17 +51,25 @@ namespace CoinMonitor.Connections.WhiteBit
 
         private async Task ReceiveAsync()
         {
-            var buffer = new byte[1024 * 4];
-
             while (_socket.State == WebSocketState.Open)
             {
-                var result = await _socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                using var ms = new MemoryStream();
+                WebSocketReceiveResult result;
+                do
+                {
+                    var messageBuffer = WebSocket.CreateClientBuffer(1024 * 4, 16);
+                    result = await _socket.ReceiveAsync(messageBuffer, CancellationToken.None);
+                    ms.Write(messageBuffer.Array, messageBuffer.Offset, result.Count);
+                } while (!result.EndOfMessage);
 
                 if (result.MessageType == WebSocketMessageType.Close)
                     await StopAsync();
                 else
                 {
-                    var json = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    if (!result.EndOfMessage)
+                        continue;
+
+                    var json = Encoding.UTF8.GetString(ms.ToArray());
                     TickerDto update;
                     try
                     {
@@ -75,7 +77,7 @@ namespace CoinMonitor.Connections.WhiteBit
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        Console.WriteLine(e.ToString());
                         continue;
                     }
 
@@ -84,7 +86,7 @@ namespace CoinMonitor.Connections.WhiteBit
 
                     var coinName = update.Params[0].Substring(0, update.Params[0].Length - 5);
                     PriceUpdate?.Invoke(this,
-                        new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Params[1]), "WhiteBit"));
+                        new PriceChangedEventArgs(coinName, decimal.Parse(update.Params[1], NumberStyles.Float), "WhiteBit"));
                 }
             }
         }

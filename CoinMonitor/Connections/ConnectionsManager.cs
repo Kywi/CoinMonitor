@@ -13,11 +13,11 @@ namespace CoinMonitor.Connections
 
         private List<Task> _tasks = new List<Task>();
 
-        public ConnectionsManager(List<string> symbols, EventHandler<PriceChangedEventArgs> priceUpdate)
+        public ConnectionsManager(EventHandler<PriceChangedEventArgs> priceUpdate)
         {
-            _sockets.Add(new BinanceWebSocketManager(symbols));
-            _sockets.Add(new WhiteBitWebSocketManager(symbols));
-            _sockets.Add(new BybitWebSocketManager(symbols));
+            _sockets.Add(new BinanceWebSocketManager());
+            _sockets.Add(new WhiteBitWebSocketManager());
+            _sockets.Add(new BybitWebSocketManager());
 
             foreach (var socketManager in _sockets)
                 socketManager.PriceUpdate += priceUpdate;

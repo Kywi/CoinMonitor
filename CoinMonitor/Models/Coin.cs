@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Windows.UI;
 using Windows.UI.Xaml.Media;
 using ObservableDictionary;
-using Color = System.Drawing.Color;
 
 namespace CoinMonitor.Models
 {
@@ -34,9 +31,9 @@ namespace CoinMonitor.Models
             _coinsPricesView["WhiteBit"] = 0;
             _coinsPricesView["Bybit"] = 0;
 
-            _colors["Binance"] = new SolidColorBrush(Windows.UI.Colors.Black);
-            _colors["WhiteBit"] = new SolidColorBrush(Windows.UI.Colors.Black);
-            _colors["Bybit"] = new SolidColorBrush(Windows.UI.Colors.Black);
+            _colors["Binance"] = new SolidColorBrush(Windows.UI.Colors.White);
+            _colors["WhiteBit"] = new SolidColorBrush(Windows.UI.Colors.White);
+            _colors["Bybit"] = new SolidColorBrush(Windows.UI.Colors.White);
 
             _coinsPrices.DictionaryChanged += CoinsPricesOnDictionaryChanged;
         }
@@ -100,15 +97,15 @@ namespace CoinMonitor.Models
             return true;
         }
 
-        private int CalculatePercentage(decimal price, decimal coin, string exchangeName)
+        private decimal CalculatePercentage(decimal price, decimal coin, string exchangeName)
         {
             if (price == 0 || coin == 0) return 0;
-            var result = (int)(coin * 100 / price) - 100;
+            var result = Math.Round((coin * 100 / price) - 100, 2);
 
             if (result > 0)
                 _colors[exchangeName] = new SolidColorBrush(Windows.UI.Colors.Green);
             else if( result == 0)
-                _colors[exchangeName] = new SolidColorBrush(Windows.UI.Colors.Black);
+                _colors[exchangeName] = new SolidColorBrush(Windows.UI.Colors.White);
             else
                 _colors[exchangeName] = new SolidColorBrush(Windows.UI.Colors.Red);
 
