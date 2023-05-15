@@ -9,15 +9,15 @@ namespace CoinMonitor.Connections
 {
     public class ConnectionsManager
     {
-        private List<IWebSocketManager> _sockets = new List<IWebSocketManager>();
+        private readonly List<IWebSocketManager> _sockets = new List<IWebSocketManager>();
 
-        private List<Task> _tasks = new List<Task>();
+        private readonly List<Task> _tasks = new List<Task>();
 
         public ConnectionsManager(EventHandler<PriceChangedEventArgs> priceUpdate)
         {
-            _sockets.Add(new BinanceWebSocketManager());
-            _sockets.Add(new WhiteBitWebSocketManager());
-            _sockets.Add(new BybitWebSocketManager());
+            _sockets.Add(new Binance.Connection());
+            _sockets.Add(new WhiteBit.Connection());
+            _sockets.Add(new Bybit.Connection());
 
             foreach (var socketManager in _sockets)
                 socketManager.PriceUpdate += priceUpdate;
@@ -26,9 +26,7 @@ namespace CoinMonitor.Connections
         public void Connect()
         {
             foreach (var socketManager in _sockets)
-            {
                 _tasks.Add(socketManager.StartAsync());
-            }
         }
     }
 }

@@ -18,7 +18,6 @@ namespace CoinMonitor
 
             Coins["BTC"] = new Coin("BTC");
             _connectionsManager = new ConnectionsManager(PriceUpdate);
-
         }
 
         private void PriceUpdate(object sender, PriceChangedEventArgs e)
@@ -33,7 +32,7 @@ namespace CoinMonitor
             }
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 

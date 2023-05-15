@@ -12,6 +12,6 @@ namespace CoinMonitor.Connections.Bybit
         public string Operation { get; set; } = string.Empty;
 
         [JsonProperty("args")]
-        public object[] Parameters { get; set; } = Array.Empty<object>();
+        public string[] Parameters { get; set; } = Array.Empty<string>();
     }
 }

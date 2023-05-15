@@ -52,9 +52,9 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Connections\Binance\TickerDto.cs" />
-    <Compile Include="Connections\Binance\BinanceWebSocketManager.cs" />
+    <Compile Include="Connections\Binance\Connection.cs" />
     <Compile Include="Connections\Binance\WebSocketSubscriptionDto.cs" />
-    <Compile Include="Connections\Bybit\BybitWebSocketManager.cs" />
+    <Compile Include="Connections\Bybit\Connection.cs" />
     <Compile Include="Connections\Bybit\TickerDto.cs" />
     <Compile Include="Connections\Bybit\WebSocketSubscriptionDto.cs" />
     <Compile Include="Connections\ConnectionsManager.cs" />
@@ -62,13 +62,18 @@
     <Compile Include="Connections\PriceChangedEventArgs.cs" />
     <Compile Include="Connections\WhiteBit\TickerDto.cs" />
     <Compile Include="Connections\WhiteBit\WebSocketSubscription.cs" />
-    <Compile Include="Connections\WhiteBit\WhiteBitWebSocketManager.cs" />
+    <Compile Include="Connections\WhiteBit\Connection.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\Coin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\SemaphoreLocker.cs" />
     <Compile Include="Utils\SupprortedCoins.cs" />
+    <Compile Include="WebSockets\Manager.cs" />
+    <Compile Include="WebSockets\MessageReceivedEventArgs.cs" />
+    <Compile Include="WebSockets\Pinger.cs" />
+    <Compile Include="WebSockets\WebSocketConnection.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
