@@ -2,27 +2,30 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoinMonitor.Crypto.Exchange;
 using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
 using Newtonsoft.Json;
 
 namespace CoinMonitor.Connections.Bybit
 {
-    public class Connection : IWebSocketManager
+    public class Connection : IConnectionManager
     {
         private readonly Manager _websocket;
+        private readonly Crypto.Exchange.Bybit _bybit;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
 
         public Connection()
         {
-            _websocket = new Manager("wss://stream.bybit.com/v5/public/spot", 20000, JsonConvert.SerializeObject(new { op = "ping" }));
+            _websocket = new Manager("wss://stream.bybit.com/v5/public/spot", 20000, true, JsonConvert.SerializeObject(new { op = "ping" }));
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _bybit = new Crypto.Exchange.Bybit();
         }
 
         public async Task StartAsync()
         {
-            var paramsForRequests = SupprortedCoins.SplitList((await SupprortedCoins.GetSupportedCoinsForByBit()).Select(symbol => $"tickers.{symbol.ToUpper()}USDT").ToList(), 10);
+            var paramsForRequests = SupprortedCoins.SplitList(_bybit.SupportedCoins.Select(symbol => $"tickers.{symbol.ToUpper()}USDT").ToList(), 10);
 
             await _websocket.Connect();
             foreach (var paramsForRequest in paramsForRequests)
@@ -38,6 +41,11 @@ namespace CoinMonitor.Connections.Bybit
             }
 
             await _websocket.StartReceiving();
+        }
+
+        public IExchange GetExchange()
+        {
+            return _bybit;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)

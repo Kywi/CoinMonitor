@@ -51,6 +51,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Crypto\Exchange\Binance.cs" />
+    <Compile Include="Crypto\Exchange\Bybit.cs" />
+    <Compile Include="Crypto\Exchange\IExchange.cs" />
+    <Compile Include="Crypto\Manager.cs" />
     <Compile Include="Connections\Binance\TickerDto.cs" />
     <Compile Include="Connections\Binance\Connection.cs" />
     <Compile Include="Connections\Binance\WebSocketSubscriptionDto.cs" />
@@ -58,11 +62,12 @@
     <Compile Include="Connections\Bybit\TickerDto.cs" />
     <Compile Include="Connections\Bybit\WebSocketSubscriptionDto.cs" />
     <Compile Include="Connections\ConnectionsManager.cs" />
-    <Compile Include="Connections\IWebSocketManager.cs" />
+    <Compile Include="Connections\IConnectionManager.cs" />
     <Compile Include="Connections\PriceChangedEventArgs.cs" />
     <Compile Include="Connections\WhiteBit\TickerDto.cs" />
     <Compile Include="Connections\WhiteBit\WebSocketSubscription.cs" />
     <Compile Include="Connections\WhiteBit\Connection.cs" />
+    <Compile Include="Crypto\Exchange\WhiteBit.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

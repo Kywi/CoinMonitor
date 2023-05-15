@@ -4,28 +4,38 @@ using System.Threading.Tasks;
 using CoinMonitor.Connections.Binance;
 using CoinMonitor.Connections.Bybit;
 using CoinMonitor.Connections.WhiteBit;
+using CoinMonitor.Crypto;
+using CoinMonitor.Crypto.Exchange;
 
 namespace CoinMonitor.Connections
 {
     public class ConnectionsManager
     {
-        private readonly List<IWebSocketManager> _sockets = new List<IWebSocketManager>();
+        private readonly List<IConnectionManager> _connections = new List<IConnectionManager>();
+        private readonly Crypto.Manager _cryptoManager;
 
         private readonly List<Task> _tasks = new List<Task>();
 
         public ConnectionsManager(EventHandler<PriceChangedEventArgs> priceUpdate)
         {
-            _sockets.Add(new Binance.Connection());
-            _sockets.Add(new WhiteBit.Connection());
-            _sockets.Add(new Bybit.Connection());
+            _connections.Add(new Binance.Connection());
+            _connections.Add(new WhiteBit.Connection());
+            _connections.Add(new Bybit.Connection());
 
-            foreach (var socketManager in _sockets)
+            var exchangeList = new List<IExchange>();
+            foreach (var socketManager in _connections)
+            {
                 socketManager.PriceUpdate += priceUpdate;
+                exchangeList.Add(socketManager.GetExchange());
+            }
+
+            _cryptoManager = new Manager(exchangeList);
         }
 
-        public void Connect()
+        public async void Connect()
         {
-            foreach (var socketManager in _sockets)
+            await _cryptoManager.CalculateSupportedCoins();
+            foreach (var socketManager in _connections)
                 _tasks.Add(socketManager.StartAsync());
         }
     }

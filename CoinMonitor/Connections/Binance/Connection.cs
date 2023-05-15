@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CoinMonitor.Crypto.Exchange;
 using Newtonsoft.Json;
 using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
@@ -8,26 +9,23 @@ using Newtonsoft.Json.Linq;
 
 namespace CoinMonitor.Connections.Binance
 {
-    public class Connection : IWebSocketManager
+    public class Connection : IConnectionManager
     {
         private readonly Manager _websocket;
+        private readonly Crypto.Exchange.Binance _binance;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
 
         public Connection()
         {
-            var pingMessage = new JObject
-            {
-                { "id", Guid.NewGuid().ToString() },
-                { "method", "ping" }
-            };
-            _websocket = new Manager("wss://stream.binance.com:9443/ws", 120000, pingMessage.ToString());
+            _websocket = new Manager("wss://stream.binance.com:9443/ws", 120000, false);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _binance = new Crypto.Exchange.Binance();
         }
 
         public async Task StartAsync()
         {
-            var requestParams = (await SupprortedCoins.GetSupportedCoinsForBinance()).Select(symbol => $"{symbol.ToLower()}usdt@ticker").ToList();
+            var requestParams = _binance.SupportedCoins.Select(symbol => $"{symbol.ToLower()}usdt@ticker").ToList();
 
             await _websocket.Connect();
             var subscription = new WebSocketSubscriptionDto
@@ -39,6 +37,11 @@ namespace CoinMonitor.Connections.Binance
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
 
             await _websocket.StartReceiving();
+        }
+
+        public IExchange GetExchange()
+        {
+            return _binance;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)

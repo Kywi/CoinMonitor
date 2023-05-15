@@ -10,16 +10,17 @@ namespace CoinMonitor.WebSockets
 
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
-        public Manager(string url, double pingInterval, string pingMessage)
+        public Manager(string url, double pingInterval, bool ifPingerEnabled = true, string pingMessage = "")
         {
             _connection = new WebSocketConnection(url);
-            _pinger = new Pinger(_connection, pingInterval, pingMessage);
+            if (ifPingerEnabled)
+                _pinger = new Pinger(_connection, pingInterval, pingMessage);
         }
 
         public async Task Connect()
         {
             await _connection.Connect();
-            _pinger.Start();
+            _pinger?.Start();
         }
 
         public async Task Close()

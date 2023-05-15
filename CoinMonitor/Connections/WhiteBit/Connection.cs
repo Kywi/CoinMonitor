@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using CoinMonitor.Crypto.Exchange;
 using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
 using Newtonsoft.Json;
@@ -9,9 +10,10 @@ using Newtonsoft.Json.Linq;
 
 namespace CoinMonitor.Connections.WhiteBit
 {
-    public class Connection : IWebSocketManager
+    public class Connection : IConnectionManager
     {
         private readonly Manager _websocket;
+        private readonly Crypto.Exchange.WhiteBit _whiteBit;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
         public Connection()
@@ -22,13 +24,14 @@ namespace CoinMonitor.Connections.WhiteBit
                 { "method", "ping" },
                 { "params", new JArray() }
             };
-            _websocket = new Manager("wss://api.whitebit.com/ws", 20000, pingMessage.ToString());
+            _websocket = new Manager("wss://api.whitebit.com/ws", 20000, true, pingMessage.ToString());
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _whiteBit = new Crypto.Exchange.WhiteBit();
         }
 
         public async Task StartAsync()
         {
-            var requestParams = (await SupprortedCoins.GetSupportedCoinsForWhiteBit()).Select(symbol => $"{symbol.ToUpper()}_USDT").ToList();
+            var requestParams = _whiteBit.SupportedCoins.Select(symbol => $"{symbol.ToUpper()}_USDT").ToList();
 
             await _websocket.Connect();
             var subscription = new WebSocketSubscription
@@ -40,6 +43,11 @@ namespace CoinMonitor.Connections.WhiteBit
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
 
             await _websocket.StartReceiving();
+        }
+
+        public IExchange GetExchange()
+        {
+            return _whiteBit;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
