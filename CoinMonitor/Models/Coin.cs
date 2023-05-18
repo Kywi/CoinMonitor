@@ -26,14 +26,17 @@ namespace CoinMonitor.Models
             _coinsPrices["Binance"] = 0;
             _coinsPrices["WhiteBit"] = 0;
             _coinsPrices["Bybit"] = 0;
+            _coinsPrices["CoinBase"] = 0;
 
             _coinsPricesView["Binance"] = 0;
             _coinsPricesView["WhiteBit"] = 0;
             _coinsPricesView["Bybit"] = 0;
+            _coinsPricesView["CoinBase"] = 0;
 
             _colors["Binance"] = new SolidColorBrush(Windows.UI.Colors.White);
             _colors["WhiteBit"] = new SolidColorBrush(Windows.UI.Colors.White);
             _colors["Bybit"] = new SolidColorBrush(Windows.UI.Colors.White);
+            _colors["CoinBase"] = new SolidColorBrush(Windows.UI.Colors.White);
 
             _coinsPrices.DictionaryChanged += CoinsPricesOnDictionaryChanged;
         }
@@ -102,12 +105,18 @@ namespace CoinMonitor.Models
             if (price == 0 || coin == 0) return 0;
             var result = Math.Round((coin * 100 / price) - 100, 2);
 
+            var brush = new SolidColorBrush
+            {
+                Opacity = Convert.ToDouble(Math.Abs(result)) / 0.4
+            };
             if (result > 0)
-                _colors[exchangeName] = new SolidColorBrush(Windows.UI.Colors.Green);
-            else if( result == 0)
-                _colors[exchangeName] = new SolidColorBrush(Windows.UI.Colors.White);
+                brush.Color = Windows.UI.Colors.Green;
+            else if (result == 0)
+                brush.Color = Windows.UI.Colors.White;
             else
-                _colors[exchangeName] = new SolidColorBrush(Windows.UI.Colors.Red);
+                brush.Color = Windows.UI.Colors.Red;
+
+            _colors[exchangeName] = brush;
 
             return result;
         }

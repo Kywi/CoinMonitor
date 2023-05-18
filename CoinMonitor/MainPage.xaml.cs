@@ -17,6 +17,7 @@ namespace CoinMonitor
             this.InitializeComponent();
 
             Coins["BTC"] = new Coin("BTC");
+            Coins["ETH"] = new Coin("ETH");
             _connectionsManager = new ConnectionsManager(PriceUpdate);
         }
 

@@ -51,9 +51,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Connections\CoinBase\Connection.cs" />
+    <Compile Include="Connections\CoinBase\TickerDto.cs" />
+    <Compile Include="Connections\CoinBase\WebSocketSubscription.cs" />
     <Compile Include="Crypto\Exchange\Binance.cs" />
     <Compile Include="Crypto\Exchange\Bybit.cs" />
     <Compile Include="Crypto\Exchange\IExchange.cs" />
+    <Compile Include="Crypto\Exchange\CoinBase.cs" />
     <Compile Include="Crypto\Manager.cs" />
     <Compile Include="Connections\Binance\TickerDto.cs" />
     <Compile Include="Connections\Binance\Connection.cs" />

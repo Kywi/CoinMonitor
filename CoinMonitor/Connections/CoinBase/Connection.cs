@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,37 +8,31 @@ using CoinMonitor.WebSockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CoinMonitor.Connections.WhiteBit
+namespace CoinMonitor.Connections.CoinBase
 {
     public class Connection : IConnectionManager
     {
         private readonly Manager _websocket;
-        private readonly Crypto.Exchange.WhiteBit _whiteBit;
+        private readonly Crypto.Exchange.CoinBase _coinBase;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
         public Connection()
         {
-            var pingMessage = new JObject
-            {
-                { "id", 228 },
-                { "method", "ping" },
-                { "params", new JArray() }
-            };
-            _websocket = new Manager("wss://api.whitebit.com/ws", pingMessage: pingMessage.ToString());
+            _websocket = new Manager("wss://ws-feed.exchange.coinbase.com", false);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
-            _whiteBit = new Crypto.Exchange.WhiteBit();
+            _coinBase = new Crypto.Exchange.CoinBase();
         }
 
         public async Task StartAsync()
         {
-            var requestParams = _whiteBit.SupportedCoins.Select(symbol => $"{symbol.ToUpper()}_USDT").ToList();
+            var productIds = _coinBase.SupportedCoins.Select(symbol => $"{symbol.ToUpper()}-USDT").ToList();
 
             await _websocket.Connect();
             var subscription = new WebSocketSubscription
             {
-                Method = "lastprice_subscribe",
-                Params = requestParams,
-                Id = 1
+                Type = "subscribe",
+                ProductIds = productIds,
+                Channels = new List<string> { "ticker" }
             };
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
 
@@ -46,7 +41,7 @@ namespace CoinMonitor.Connections.WhiteBit
 
         public IExchange GetExchange()
         {
-            return _whiteBit;
+            return _coinBase;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
@@ -62,11 +57,11 @@ namespace CoinMonitor.Connections.WhiteBit
                 return;
             }
 
-            if (update?.Params == null)
+            if (update?.ProductId == null)
                 return;
 
-            var coinName = update.Params[0].Substring(0, update.Params[0].Length - 5);
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, decimal.Parse(update.Params[1], NumberStyles.Float), "WhiteBit"));
+            var coinName = update.ProductId.Substring(0, update.ProductId.Length - 5);
+            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Price, "CoinBase"));
         }
     }
 }

@@ -18,7 +18,7 @@ namespace CoinMonitor.Connections.Bybit
 
         public Connection()
         {
-            _websocket = new Manager("wss://stream.bybit.com/v5/public/spot", 20000, true, JsonConvert.SerializeObject(new { op = "ping" }));
+            _websocket = new Manager("wss://stream.bybit.com/v5/public/spot", pingMessage: JsonConvert.SerializeObject(new { op = "ping" }));
             _websocket.MessageReceived += WebsocketOnMessageReceived;
             _bybit = new Crypto.Exchange.Bybit();
         }

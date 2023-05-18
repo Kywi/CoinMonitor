@@ -9,12 +9,11 @@
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:models="using:CoinMonitor.Models"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid >
-        <controls:DataGrid x:Name="MonitoringDataGrid" ItemsSource="{x:Bind Path=Coins.Values, Mode=OneWay}" AutoGenerateColumns="False">
-            <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Header="Coin name" Binding="{Binding Name}"/>
-                <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinsPricesView[Binance]}"/>
+    <Grid>
+        <controls:DataGrid x:Name="MonitoringDataGrid" CanUserSortColumns="True" ItemsSource="{x:Bind Path=Coins.Values, Mode=OneWay}" AutoGenerateColumns="False" IsReadOnly="True" FontSize="30" FontFamily="Arial Black" RowHeight="32" GridLinesVisibility="Horizontal" >
+            <controls:DataGrid.Columns >
+                <controls:DataGridTextColumn Header="Coin name" Binding="{Binding Name}" CanUserSort="True"/>
+                <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinsPricesView[Binance]}" />
                 <controls:DataGridTemplateColumn Header="Bybit" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -29,6 +28,15 @@
                         <DataTemplate>
                             <Border Background="{Binding Colors[WhiteBit]}">
                                 <TextBlock Text="{Binding CoinsPricesView[WhiteBit]}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                </controls:DataGridTemplateColumn>
+                <controls:DataGridTemplateColumn Header="CoinBase" >
+                    <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding Colors[CoinBase]}">
+                                <TextBlock Text="{Binding CoinsPricesView[CoinBase]}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>

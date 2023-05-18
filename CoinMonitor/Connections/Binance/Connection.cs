@@ -3,9 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CoinMonitor.Crypto.Exchange;
 using Newtonsoft.Json;
-using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
-using Newtonsoft.Json.Linq;
 
 namespace CoinMonitor.Connections.Binance
 {
@@ -18,7 +16,7 @@ namespace CoinMonitor.Connections.Binance
 
         public Connection()
         {
-            _websocket = new Manager("wss://stream.binance.com:9443/ws", 120000, false);
+            _websocket = new Manager("wss://stream.binance.com:9443/ws", false);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
             _binance = new Crypto.Exchange.Binance();
         }

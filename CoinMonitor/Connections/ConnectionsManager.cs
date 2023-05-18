@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CoinMonitor.Connections.Binance;
-using CoinMonitor.Connections.Bybit;
-using CoinMonitor.Connections.WhiteBit;
 using CoinMonitor.Crypto;
 using CoinMonitor.Crypto.Exchange;
 
@@ -21,6 +18,7 @@ namespace CoinMonitor.Connections
             _connections.Add(new Binance.Connection());
             _connections.Add(new WhiteBit.Connection());
             _connections.Add(new Bybit.Connection());
+            _connections.Add(new CoinBase.Connection());
 
             var exchangeList = new List<IExchange>();
             foreach (var socketManager in _connections)
