@@ -1,19 +1,26 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace CoinMonitor.Crypto.Exchange
 {
-    public class Binance : IExchange
+    public class Kraken : IExchange
     {
+        class CoinDto
+        {
+            [JsonProperty("wsname")]
+            public string WsName { get; set; }
+        }
+
         private readonly string _url;
 
         public List<string> SupportedCoins { get; private set; }
 
-        public Binance()
+        public Kraken()
         {
-            _url = "https://api.binance.com/api/v3/exchangeInfo";
+            _url = "https://api.kraken.com/0/public/AssetPairs";
         }
 
         public void SetSupportedCoins(List<string> supportedCoins)
@@ -28,17 +35,15 @@ namespace CoinMonitor.Crypto.Exchange
             var response = await client.GetAsync(_url);
 
             var content = await response.Content.ReadAsStringAsync();
-
-            var exchangeInfo = JObject.Parse(content);
-            var symbols = (JArray)exchangeInfo["symbols"];
+            var coins = JsonConvert.DeserializeObject<Dictionary<string, CoinDto>>(JObject.Parse(content)["result"].ToString());
 
             var coinNames = new HashSet<string>();
-            foreach (var symbol in symbols)
+            foreach (var coin in coins)
             {
-                var parts = symbol["baseAsset"].ToString();
-                var quoteAsset = symbol["quoteAsset"].ToString();
-                if (quoteAsset == "USDT")
-                    coinNames.Add(parts.ToUpper());
+                var names = coin.Value.WsName.Split('/');
+
+                if (names[1] == "USDT" /*|| names[1] == "USD"*/)
+                    coinNames.Add(names[0]);
             }
 
             coinNames.Remove("USDT");

@@ -25,7 +25,7 @@ namespace CoinMonitor.Connections.Bybit
 
         public async Task StartAsync()
         {
-            var paramsForRequests = SupprortedCoins.SplitList(_bybit.SupportedCoins.Select(symbol => $"tickers.{symbol.ToUpper()}USDT").ToList(), 10);
+            var paramsForRequests = CollectionsHelpers.SplitList(_bybit.SupportedCoins.Select(symbol => $"tickers.{symbol.ToUpper()}USDT").ToList(), 10);
 
             await _websocket.Connect();
             foreach (var paramsForRequest in paramsForRequests)

@@ -19,6 +19,7 @@ namespace CoinMonitor.Connections
             _connections.Add(new WhiteBit.Connection());
             _connections.Add(new Bybit.Connection());
             _connections.Add(new CoinBase.Connection());
+            _connections.Add(new Kraken.Connection());
 
             var exchangeList = new List<IExchange>();
             foreach (var socketManager in _connections)

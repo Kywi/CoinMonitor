@@ -54,6 +54,11 @@
     <Compile Include="Connections\CoinBase\Connection.cs" />
     <Compile Include="Connections\CoinBase\TickerDto.cs" />
     <Compile Include="Connections\CoinBase\WebSocketSubscription.cs" />
+    <Compile Include="Connections\Kraken\Connection.cs" />
+    <Compile Include="Connections\Kraken\Subscription.cs" />
+    <Compile Include="Connections\Kraken\TickerDto.cs" />
+    <Compile Include="Connections\Kraken\WebSocketSubscription.cs" />
+    <Compile Include="Crypto\Exchange\Kraken.cs" />
     <Compile Include="Crypto\Exchange\Binance.cs" />
     <Compile Include="Crypto\Exchange\Bybit.cs" />
     <Compile Include="Crypto\Exchange\IExchange.cs" />
@@ -77,8 +82,8 @@
     </Compile>
     <Compile Include="Models\Coin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\CollectionsHelpers.cs" />
     <Compile Include="Utils\SemaphoreLocker.cs" />
-    <Compile Include="Utils\SupprortedCoins.cs" />
     <Compile Include="WebSockets\Manager.cs" />
     <Compile Include="WebSockets\MessageReceivedEventArgs.cs" />
     <Compile Include="WebSockets\Pinger.cs" />

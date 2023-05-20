@@ -5,59 +5,47 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Windows.UI.Xaml.Media;
+using CoinMonitor.WebSockets;
 using ObservableDictionary;
 
 namespace CoinMonitor.Models
 {
     public class Coin : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private string _name = "";
-
         private ObservableStringDictionary<decimal> _coinsPricesView = new ObservableStringDictionary<decimal>();
-
         private ObservableStringDictionary<decimal> _coinsPrices = new ObservableStringDictionary<decimal>();
         private ObservableStringDictionary<Brush> _colors = new ObservableStringDictionary<Brush>();
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public Coin(string name)
         {
             Name = name;
-            _coinsPrices["Binance"] = 0;
-            _coinsPrices["WhiteBit"] = 0;
-            _coinsPrices["Bybit"] = 0;
-            _coinsPrices["CoinBase"] = 0;
-
-            _coinsPricesView["Binance"] = 0;
-            _coinsPricesView["WhiteBit"] = 0;
-            _coinsPricesView["Bybit"] = 0;
-            _coinsPricesView["CoinBase"] = 0;
-
-            _colors["Binance"] = new SolidColorBrush(Windows.UI.Colors.White);
-            _colors["WhiteBit"] = new SolidColorBrush(Windows.UI.Colors.White);
-            _colors["Bybit"] = new SolidColorBrush(Windows.UI.Colors.White);
-            _colors["CoinBase"] = new SolidColorBrush(Windows.UI.Colors.White);
+            foreach (var exchange in Crypto.Manager.SupportedExchanges)
+            {
+                _coinsPrices[exchange] = 0;
+                _coinsPricesView[exchange] = 0;
+                _colors[exchange] = new SolidColorBrush(Windows.UI.Colors.White); ;
+            }
 
             _coinsPrices.DictionaryChanged += CoinsPricesOnDictionaryChanged;
         }
 
         private void CoinsPricesOnDictionaryChanged(object sender, NotifyDictionaryChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Reset)
-            {
-                if ((string)e.AddedKey == "Binance")
-                {
-                    _coinsPricesView["Binance"] = (decimal)e.AddedItem;
+            if (e.Action != NotifyCollectionChangedAction.Reset)
+                return;
 
-                    foreach (var coin in _coinsPricesView.Keys.ToList())
-                    {
-                        if (coin != "Binance")
-                            _coinsPricesView[coin] = CalculatePercentage((decimal)e.AddedItem, _coinsPrices[coin], coin);
-                    }
-                }
-                else
-                    _coinsPricesView[(string)e.AddedKey] = CalculatePercentage(_coinsPrices["Binance"], (decimal)e.AddedItem, (string)e.AddedKey);
+            if ((string)e.AddedKey == "Binance")
+            {
+                _coinsPricesView["Binance"] = (decimal)e.AddedItem;
+
+                foreach (var coin in _coinsPricesView.Keys.ToList().Where(coin => coin != "Binance"))
+                    _coinsPricesView[coin] = CalculatePercentage((decimal)e.AddedItem, _coinsPrices[coin], coin);
             }
+            else
+                _coinsPricesView[(string)e.AddedKey] = CalculatePercentage(_coinsPrices["Binance"], (decimal)e.AddedItem, (string)e.AddedKey);
         }
 
         public string Name
@@ -84,7 +72,6 @@ namespace CoinMonitor.Models
             set => SetField(ref _colors, value);
         }
 
-
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -107,7 +94,7 @@ namespace CoinMonitor.Models
 
             var brush = new SolidColorBrush
             {
-                Opacity = Convert.ToDouble(Math.Abs(result)) / 0.4
+                Opacity = Convert.ToDouble(Math.Abs(result)) / 0.5
             };
             if (result > 0)
                 brush.Color = Windows.UI.Colors.Green;
