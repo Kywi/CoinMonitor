@@ -9,7 +9,7 @@ namespace CoinMonitor.Crypto
     {
         private readonly List<IExchange> _exchanges;
 
-        public static string[] SupportedExchanges = { "Binance", "WhiteBit", "Bybit", "CoinBase", "Kraken" };
+        public static string[] SupportedExchanges = { "Binance", "WhiteBit", "Bybit", "CoinBase", "Kraken", "OKX" };
 
         public Manager(List<IExchange> exchanges)
         {
