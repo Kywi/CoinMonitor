@@ -16,11 +16,11 @@ namespace CoinMonitor.Crypto
             _exchanges = exchanges;
         }
 
-        public async Task CalculateSupportedCoins()
+        public async Task CalculateSupportedPairs()
         {
-            var exchangeSupportedCoins = new Dictionary<IExchange, HashSet<string>>();
+            var exchangeSupportedCoins = new Dictionary<IExchange, HashSet<TradingPair>>();
             foreach (var exchange in _exchanges)
-                exchangeSupportedCoins.Add(exchange, await exchange.RequestForSupportedCoins());
+                exchangeSupportedCoins.Add(exchange, await exchange.RequestForSupportedPairs());
 
             foreach (var exchangeCoins in exchangeSupportedCoins)
                 exchangeCoins.Value.RemoveWhere(coin => exchangeSupportedCoins.All(ex =>
@@ -32,7 +32,7 @@ namespace CoinMonitor.Crypto
                 }));
 
             foreach (var exchangeCoins in exchangeSupportedCoins)
-                exchangeCoins.Key.SetSupportedCoins(exchangeCoins.Value.ToList());
+                exchangeCoins.Key.SetSupportedPairs(exchangeCoins.Value.ToList());
         }
     }
 }

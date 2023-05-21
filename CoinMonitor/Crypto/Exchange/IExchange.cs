@@ -5,8 +5,8 @@ namespace CoinMonitor.Crypto.Exchange
 {
     public interface IExchange
     {
-        public void SetSupportedCoins(List<string> supportedCoins);
+        public void SetSupportedPairs(List<TradingPair> supportedCoins);
 
-        public Task<HashSet<string>> RequestForSupportedCoins();
+        public Task<HashSet<TradingPair>> RequestForSupportedPairs();
     }
 }

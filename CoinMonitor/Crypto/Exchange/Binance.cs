@@ -9,19 +9,20 @@ namespace CoinMonitor.Crypto.Exchange
     {
         private readonly string _url;
 
-        public List<string> SupportedCoins { get; private set; }
+        public List<TradingPair> SupportedCoins { get; private set; }
 
         public Binance()
         {
+            SupportedCoins = new List<TradingPair>();
             _url = "https://api.binance.com/api/v3/exchangeInfo";
         }
 
-        public void SetSupportedCoins(List<string> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedCoins)
         {
             SupportedCoins = supportedCoins;
         }
 
-        public async Task<HashSet<string>> RequestForSupportedCoins()
+        public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();
 
@@ -32,16 +33,16 @@ namespace CoinMonitor.Crypto.Exchange
             var exchangeInfo = JObject.Parse(content);
             var symbols = (JArray)exchangeInfo["symbols"];
 
-            var coinNames = new HashSet<string>();
+            var coinNames = new HashSet<TradingPair>();
             foreach (var symbol in symbols)
             {
-                var parts = symbol["baseAsset"].ToString();
-                var quoteAsset = symbol["quoteAsset"].ToString();
-                if (quoteAsset == "USDT")
-                    coinNames.Add(parts.ToUpper());
+                var parts = symbol["baseAsset"].ToString().ToUpper();
+                var quoteAsset = symbol["quoteAsset"].ToString().ToUpper();
+                var pair = new TradingPair(parts, quoteAsset);
+                if (TradingPair.IsSupportedPair(pair))
+                    coinNames.Add(pair);
             }
 
-            coinNames.Remove("USDT");
             return coinNames;
         }
     }

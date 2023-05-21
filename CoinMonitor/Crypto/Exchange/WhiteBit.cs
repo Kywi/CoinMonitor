@@ -9,20 +9,20 @@ namespace CoinMonitor.Crypto.Exchange
     {
         private readonly string _url;
 
-        public List<string> SupportedCoins { get; private set; }
+        public List<TradingPair> SupportedCoins { get; private set; }
 
         public WhiteBit()
         {
-            SupportedCoins = new List<string>();
+            SupportedCoins = new List<TradingPair>();
             _url = "https://whitebit.com/api/v4/public/markets";
         }
 
-        public void SetSupportedCoins(List<string> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedCoins)
         {
             SupportedCoins = supportedCoins;
         }
 
-        public async Task<HashSet<string>> RequestForSupportedCoins()
+        public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();
             var response = await client.GetAsync(_url);
@@ -30,16 +30,16 @@ namespace CoinMonitor.Crypto.Exchange
             var content = await response.Content.ReadAsStringAsync();
             var markets = JArray.Parse(content);
 
-            var coinNames = new HashSet<string>();
+            var coinNames = new HashSet<TradingPair>();
             foreach (var market in markets)
             {
-                var name = market["name"].ToString();
-                var names = name.Split('_');
-                if (names[1] == "USDT")
-                    coinNames.Add(names[0]);
+                var names = market["name"].ToString().Split('_');
+
+                var pair = new TradingPair(names[0], names[1]);
+                if (TradingPair.IsSupportedPair(pair))
+                    coinNames.Add(pair);
             }
 
-            coinNames.Remove("USDT");
             return coinNames;
         }
     }

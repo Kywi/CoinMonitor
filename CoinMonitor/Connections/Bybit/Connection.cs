@@ -18,14 +18,14 @@ namespace CoinMonitor.Connections.Bybit
 
         public Connection()
         {
-            _websocket = new Manager("wss://stream.bybit.com/v5/public/spot", pingMessage: JsonConvert.SerializeObject(new { op = "ping" }));
+            _websocket = new Manager("wss://stream.bybit.com/v5/public/spot", pingMessage: JsonConvert.SerializeObject(new { op = "ping" }), pingInterval: 10000);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
             _bybit = new Crypto.Exchange.Bybit();
         }
 
         public async Task StartAsync()
         {
-            var paramsForRequests = CollectionsHelpers.SplitList(_bybit.SupportedCoins.Select(symbol => $"tickers.{symbol.ToUpper()}USDT").ToList(), 10);
+            var paramsForRequests = CollectionsHelpers.SplitList(_bybit.SupportedPairs.Select(pair => $"tickers.{pair.Base}{pair.Quote}").ToList(), 10);
 
             await _websocket.Connect();
             foreach (var paramsForRequest in paramsForRequests)

@@ -9,19 +9,20 @@ namespace CoinMonitor.Crypto.Exchange
     {
         private readonly string _url;
 
-        public List<string> SupportedCoins { get; private set; }
+        public List<TradingPair> SupportedPairs { get; private set; }
 
         public Bybit()
         {
+            SupportedPairs = new List<TradingPair>();
             _url = "https://api.bybit.com/v5/market/tickers?category=spot";
         }
 
-        public void SetSupportedCoins(List<string> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedCoins)
         {
-            SupportedCoins = supportedCoins;
+            SupportedPairs = supportedCoins;
         }
 
-        public async Task<HashSet<string>> RequestForSupportedCoins()
+        public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();
             var response = await client.GetAsync(_url);
@@ -30,16 +31,19 @@ namespace CoinMonitor.Crypto.Exchange
             var symbols = JObject.Parse(content);
             var result = (JArray)symbols["result"]["list"];
 
-            var coinNames = new HashSet<string>();
+            var coinNames = new HashSet<TradingPair>();
             foreach (var symbol in result)
             {
-                var coinName = symbol["symbol"].ToString();
-                if (coinName.Contains("USDT"))
-                    coinNames.Add(coinName.Substring(0, coinName.Length - 4));
-            }
+                var pairStr = symbol["symbol"].ToString();
 
-            coinNames.Remove("USD");
-            coinNames.Remove("USDT");
+                if (!pairStr.Contains("USDT") || !(pairStr.Substring(pairStr.Length - 4, 4) == "USDT"))
+                    continue;
+
+                var baseCoin = pairStr.Substring(0, pairStr.Length - 4);
+                var pair = new TradingPair(baseCoin, "USDT");
+                if (TradingPair.IsSupportedPair(pair))
+                    coinNames.Add(pair);
+            }
 
             return coinNames;
         }

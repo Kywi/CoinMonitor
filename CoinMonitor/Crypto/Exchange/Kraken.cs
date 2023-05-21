@@ -16,19 +16,19 @@ namespace CoinMonitor.Crypto.Exchange
 
         private readonly string _url;
 
-        public List<string> SupportedCoins { get; private set; }
+        public List<TradingPair> SupportedCoins { get; private set; }
 
         public Kraken()
         {
             _url = "https://api.kraken.com/0/public/AssetPairs";
         }
 
-        public void SetSupportedCoins(List<string> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedCoins)
         {
             SupportedCoins = supportedCoins;
         }
 
-        public async Task<HashSet<string>> RequestForSupportedCoins()
+        public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();
 
@@ -37,16 +37,15 @@ namespace CoinMonitor.Crypto.Exchange
             var content = await response.Content.ReadAsStringAsync();
             var coins = JsonConvert.DeserializeObject<Dictionary<string, CoinDto>>(JObject.Parse(content)["result"].ToString());
 
-            var coinNames = new HashSet<string>();
+            var coinNames = new HashSet<TradingPair>();
             foreach (var coin in coins)
             {
                 var names = coin.Value.WsName.Split('/');
-
-                if (names[1] == "USDT" /*|| names[1] == "USD"*/)
-                    coinNames.Add(names[0]);
+                var pair = new TradingPair(names[0], names[1]);
+                if (pair.Base != "USDT" && pair.Base != "USD" && pair.Base != "EUR" && pair.Quote is "USDT" or "USD")
+                    coinNames.Add(pair);
             }
 
-            coinNames.Remove("USDT");
             return coinNames;
         }
     }

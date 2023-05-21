@@ -30,7 +30,7 @@ namespace CoinMonitor.Connections.WhiteBit
 
         public async Task StartAsync()
         {
-            var requestParams = _whiteBit.SupportedCoins.Select(symbol => $"{symbol.ToUpper()}_USDT").ToList();
+            var requestParams = _whiteBit.SupportedCoins.Select(pair => $"{pair.Base}_{pair.Quote}").ToList();
 
             await _websocket.Connect();
             var subscription = new WebSocketSubscription

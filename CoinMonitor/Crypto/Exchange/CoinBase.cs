@@ -10,20 +10,20 @@ namespace CoinMonitor.Crypto.Exchange
     {
         private readonly string _url;
 
-        public List<string> SupportedCoins { get; private set; }
+        public List<TradingPair> SupportedCoins { get; private set; }
 
         public CoinBase()
         {
-            SupportedCoins = new List<string>();
+            SupportedCoins = new List<TradingPair>();
             _url = "https://api.exchange.coinbase.com/products";
         }
 
-        public void SetSupportedCoins(List<string> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedCoins)
         {
             SupportedCoins = supportedCoins;
         }
 
-        public async Task<HashSet<string>> RequestForSupportedCoins()
+        public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();
             var productValue = new ProductInfoHeaderValue("CoinMonitor", "1.0");
@@ -33,16 +33,17 @@ namespace CoinMonitor.Crypto.Exchange
             var content = await response.Content.ReadAsStringAsync();
             var markets = JArray.Parse(content);
 
-            var coinNames = new HashSet<string>();
+            var coinNames = new HashSet<TradingPair>();
             foreach (var market in markets)
             {
                 var baseCoin = market["base_currency"].ToString();
-                var secondCoin = market["quote_currency"].ToString();
-                if (secondCoin == "USDT")
-                    coinNames.Add(baseCoin);
+                var quote = market["quote_currency"].ToString();
+
+                var pair = new TradingPair(baseCoin, quote);
+                if (TradingPair.IsSupportedPair(pair))
+                    coinNames.Add(pair);
             }
 
-            coinNames.Remove("USDT");
             return coinNames;
         }
     }

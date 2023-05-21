@@ -28,7 +28,7 @@ namespace CoinMonitor.Connections.Kraken
 
         public async Task StartAsync()
         {
-            var requestParams = _kraken.SupportedCoins.Select(symbol => $"{symbol.ToUpper()}/USDT").ToList();
+            var requestParams = _kraken.SupportedCoins.Select(pair => $"{pair.Base}/{pair.Quote}").ToList();
 
             await _websocket.Connect();
             var subscription = new WebSocketSubscription
@@ -72,7 +72,7 @@ namespace CoinMonitor.Connections.Kraken
             if (update?.Price == null)
                 return;
 
-            coinName = coinName.Substring(0, coinName.Length - 5);
+            coinName = coinName.Split('/')[0];
             PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Price[0], "Kraken"));
         }
     }

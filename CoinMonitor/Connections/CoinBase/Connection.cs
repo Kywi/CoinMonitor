@@ -25,7 +25,7 @@ namespace CoinMonitor.Connections.CoinBase
 
         public async Task StartAsync()
         {
-            var productIds = _coinBase.SupportedCoins.Select(symbol => $"{symbol.ToUpper()}-USDT").ToList();
+            var productIds = _coinBase.SupportedCoins.Select(pair => $"{pair.Base}-{pair.Quote}").ToList();
 
             await _websocket.Connect();
             var subscription = new WebSocketSubscription
