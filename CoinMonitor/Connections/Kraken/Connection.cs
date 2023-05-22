@@ -28,7 +28,7 @@ namespace CoinMonitor.Connections.Kraken
 
         public async Task StartAsync()
         {
-            var requestParams = _kraken.SupportedCoins.Select(pair => $"{pair.Base}/{pair.Quote}").ToList();
+            var requestParams = _kraken.SupportedPairs.Select(pair => $"{pair.Base}/{pair.Quote}").ToList();
 
             await _websocket.Connect();
             var subscription = new WebSocketSubscription

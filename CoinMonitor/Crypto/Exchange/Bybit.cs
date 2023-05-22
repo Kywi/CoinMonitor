@@ -17,20 +17,21 @@ namespace CoinMonitor.Crypto.Exchange
             _url = "https://api.bybit.com/v5/market/tickers?category=spot";
         }
 
-        public void SetSupportedPairs(List<TradingPair> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedPairs)
         {
-            SupportedPairs = supportedCoins;
+            SupportedPairs = supportedPairs;
         }
 
         public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();
+
             var response = await client.GetAsync(_url);
 
             var content = await response.Content.ReadAsStringAsync();
+
             var symbols = JObject.Parse(content);
             var result = (JArray)symbols["result"]["list"];
-
             var coinNames = new HashSet<TradingPair>();
             foreach (var symbol in result)
             {

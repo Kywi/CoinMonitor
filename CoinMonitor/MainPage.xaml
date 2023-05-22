@@ -59,6 +59,15 @@
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>
+                <controls:DataGridTemplateColumn Header="KuCoin" >
+                    <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding Colors[KuCoin]}">
+                                <TextBlock Text="{Binding CoinsPricesView[KuCoin]}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                </controls:DataGridTemplateColumn>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>

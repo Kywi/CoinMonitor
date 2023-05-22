@@ -10,29 +10,31 @@ namespace CoinMonitor.Crypto.Exchange
     {
         private readonly string _url;
 
-        public List<TradingPair> SupportedCoins { get; private set; }
+        public List<TradingPair> SupportedPairs { get; private set; }
 
         public CoinBase()
         {
-            SupportedCoins = new List<TradingPair>();
+            SupportedPairs = new List<TradingPair>();
             _url = "https://api.exchange.coinbase.com/products";
         }
 
-        public void SetSupportedPairs(List<TradingPair> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedPairs)
         {
-            SupportedCoins = supportedCoins;
+            SupportedPairs = supportedPairs;
         }
 
         public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();
+
             var productValue = new ProductInfoHeaderValue("CoinMonitor", "1.0");
+
             client.DefaultRequestHeaders.UserAgent.Add(productValue);
             var response = await client.GetAsync(_url);
 
             var content = await response.Content.ReadAsStringAsync();
-            var markets = JArray.Parse(content);
 
+            var markets = JArray.Parse(content);
             var coinNames = new HashSet<TradingPair>();
             foreach (var market in markets)
             {

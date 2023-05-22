@@ -23,7 +23,7 @@ namespace CoinMonitor.Connections.Binance
 
         public async Task StartAsync()
         {
-            var requestParams = _binance.SupportedCoins.Select(pair => $"{pair.Base.ToLower()}{pair.Quote.ToLower()}@ticker").ToList();
+            var requestParams = _binance.SupportedPairs.Select(pair => $"{pair.Base.ToLower()}{pair.Quote.ToLower()}@ticker").ToList();
 
             await _websocket.Connect();
             var subscription = new WebSocketSubscriptionDto

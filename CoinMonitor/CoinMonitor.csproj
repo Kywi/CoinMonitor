@@ -51,6 +51,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Connections\KuCoin\Connection.cs" />
+    <Compile Include="Connections\KuCoin\Data.cs" />
+    <Compile Include="Connections\KuCoin\TickerDto.cs" />
+    <Compile Include="Connections\KuCoin\WebSocketSubscription.cs" />
     <Compile Include="Connections\CoinBase\Connection.cs" />
     <Compile Include="Connections\CoinBase\TickerDto.cs" />
     <Compile Include="Connections\CoinBase\WebSocketSubscription.cs" />
@@ -61,6 +65,7 @@
     <Compile Include="Connections\OKX\Connection.cs" />
     <Compile Include="Connections\OKX\TickerDto.cs" />
     <Compile Include="Connections\OKX\WebSocketSubscriptionDto.cs" />
+    <Compile Include="Crypto\Exchange\KuCoin.cs" />
     <Compile Include="Crypto\Exchange\Kraken.cs" />
     <Compile Include="Crypto\Exchange\Binance.cs" />
     <Compile Include="Crypto\Exchange\Bybit.cs" />

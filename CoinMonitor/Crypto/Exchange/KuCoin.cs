@@ -1,20 +1,21 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CoinMonitor.Crypto.Exchange
 {
-    public class WhiteBit : IExchange
+    public class KuCoin : IExchange
     {
         private readonly string _url;
 
         public List<TradingPair> SupportedPairs { get; private set; }
 
-        public WhiteBit()
+        public KuCoin()
         {
             SupportedPairs = new List<TradingPair>();
-            _url = "https://whitebit.com/api/v4/public/markets";
+            _url = "https://api.kucoin.com/api/v2/symbols";
         }
 
         public void SetSupportedPairs(List<TradingPair> supportedPairs)
@@ -29,14 +30,15 @@ namespace CoinMonitor.Crypto.Exchange
             var response = await client.GetAsync(_url);
 
             var content = await response.Content.ReadAsStringAsync();
-            
-            var markets = JArray.Parse(content);
+
+            var markets = (JArray)JObject.Parse(content)["data"];
             var coinNames = new HashSet<TradingPair>();
             foreach (var market in markets)
             {
-                var names = market["name"].ToString().Split('_');
+                var baseCoin = market["baseCurrency"].ToString();
+                var quote = market["quoteCurrency"].ToString();
 
-                var pair = new TradingPair(names[0], names[1]);
+                var pair = new TradingPair(baseCoin, quote);
                 if (TradingPair.IsSupportedPair(pair))
                     coinNames.Add(pair);
             }

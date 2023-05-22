@@ -16,16 +16,16 @@ namespace CoinMonitor.Crypto.Exchange
 
         private readonly string _url;
 
-        public List<TradingPair> SupportedCoins { get; private set; }
+        public List<TradingPair> SupportedPairs { get; private set; }
 
         public Kraken()
         {
             _url = "https://api.kraken.com/0/public/AssetPairs";
         }
 
-        public void SetSupportedPairs(List<TradingPair> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedPairs)
         {
-            SupportedCoins = supportedCoins;
+            SupportedPairs = supportedPairs;
         }
 
         public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
@@ -35,8 +35,8 @@ namespace CoinMonitor.Crypto.Exchange
             var response = await client.GetAsync(_url);
 
             var content = await response.Content.ReadAsStringAsync();
-            var coins = JsonConvert.DeserializeObject<Dictionary<string, CoinDto>>(JObject.Parse(content)["result"].ToString());
 
+            var coins = JsonConvert.DeserializeObject<Dictionary<string, CoinDto>>(JObject.Parse(content)["result"].ToString());
             var coinNames = new HashSet<TradingPair>();
             foreach (var coin in coins)
             {

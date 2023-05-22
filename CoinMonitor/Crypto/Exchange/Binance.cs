@@ -9,17 +9,17 @@ namespace CoinMonitor.Crypto.Exchange
     {
         private readonly string _url;
 
-        public List<TradingPair> SupportedCoins { get; private set; }
+        public List<TradingPair> SupportedPairs { get; private set; }
 
         public Binance()
         {
-            SupportedCoins = new List<TradingPair>();
+            SupportedPairs = new List<TradingPair>();
             _url = "https://api.binance.com/api/v3/exchangeInfo";
         }
 
-        public void SetSupportedPairs(List<TradingPair> supportedCoins)
+        public void SetSupportedPairs(List<TradingPair> supportedPairs)
         {
-            SupportedCoins = supportedCoins;
+            SupportedPairs = supportedPairs;
         }
 
         public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
@@ -32,7 +32,6 @@ namespace CoinMonitor.Crypto.Exchange
 
             var exchangeInfo = JObject.Parse(content);
             var symbols = (JArray)exchangeInfo["symbols"];
-
             var coinNames = new HashSet<TradingPair>();
             foreach (var symbol in symbols)
             {

@@ -12,7 +12,7 @@ namespace CoinMonitor.Connections
         private readonly List<IConnectionManager> _connections = new List<IConnectionManager>();
         private readonly Crypto.Manager _cryptoManager;
 
-        private readonly List<Task> _tasks = new List<Task>();
+        private readonly List<Task> _tasks = new();
 
         public ConnectionsManager(EventHandler<PriceChangedEventArgs> priceUpdate)
         {
@@ -22,6 +22,7 @@ namespace CoinMonitor.Connections
             _connections.Add(new CoinBase.Connection());
             _connections.Add(new Kraken.Connection());
             _connections.Add(new OKX.Connection());
+            _connections.Add(new KuCoin.Connection());
 
             var exchangeList = new List<IExchange>();
             foreach (var socketManager in _connections)
