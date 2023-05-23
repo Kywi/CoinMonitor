@@ -94,7 +94,7 @@ namespace CoinMonitor.Models
 
             var brush = new SolidColorBrush
             {
-                Opacity = Convert.ToDouble(Math.Abs(result)) / 0.5
+                Opacity = Convert.ToDouble(Math.Abs(result)) / 0.3 * 0.15
             };
             if (result > 0)
                 brush.Color = Windows.UI.Colors.Green;
