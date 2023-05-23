@@ -31,6 +31,12 @@ namespace CoinMonitor.Crypto
                     return !ex.Value.Contains(coin);
                 }));
 
+            var binanceExchange = exchangeSupportedCoins.Select(pair => pair).First(exchangePairs => exchangePairs.Key is Binance);
+
+            foreach (var exchangeCoins in exchangeSupportedCoins)
+                if (exchangeCoins.Key is not Binance)
+                    exchangeCoins.Value.RemoveWhere(coin => !binanceExchange.Value.Contains(coin));
+
             foreach (var exchangeCoins in exchangeSupportedCoins)
                 exchangeCoins.Key.SetSupportedPairs(exchangeCoins.Value.ToList());
         }
