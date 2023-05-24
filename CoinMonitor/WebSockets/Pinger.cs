@@ -1,8 +1,9 @@
-﻿using System.Timers;
+﻿using System;
+using System.Timers;
 
 namespace CoinMonitor.WebSockets
 {
-    public class Pinger
+    public class Pinger : IDisposable
     {
         private readonly WebSocketConnection _connection;
         private readonly string _pingMessage;
@@ -18,6 +19,11 @@ namespace CoinMonitor.WebSockets
                 Interval = interval,
             };
             _timer.Elapsed += TimerOnElapsed;
+        }
+
+        public void Dispose()
+        {
+            _timer.Dispose();
         }
 
         public void Start()

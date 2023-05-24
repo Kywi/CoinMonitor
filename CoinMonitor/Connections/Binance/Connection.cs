@@ -18,28 +18,32 @@ namespace CoinMonitor.Connections.Binance
         {
             _websocket = new Manager("wss://stream.binance.com:9443/ws", false);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _websocket.OnConnected += WebsocketOnOnConnected;
             _binance = new Crypto.Exchange.Binance();
         }
 
         public async Task StartAsync()
         {
+            await _websocket.Start();
+        }
+
+        public IExchange GetExchange()
+        {
+            return _binance;
+        }
+
+        private async void WebsocketOnOnConnected(object sender, EventArgs e)
+        {
             var requestParams = _binance.SupportedPairs.Select(pair => $"{pair.Base.ToLower()}{pair.Quote.ToLower()}@ticker").ToList();
 
-            await _websocket.Connect();
             var subscription = new WebSocketSubscriptionDto
             {
                 Method = "SUBSCRIBE",
                 Params = requestParams,
                 Id = 1
             };
+
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
-
-            await _websocket.StartReceiving();
-        }
-
-        public IExchange GetExchange()
-        {
-            return _binance;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)

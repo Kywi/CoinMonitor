@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoinMonitor.Connections.Kraken;
 using CoinMonitor.Crypto.Exchange;
+using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,11 +18,15 @@ namespace CoinMonitor.Connections.KuCoin
     {
         private List<Manager> _websockets;
         private List<Task> _receiveTasks;
+        private Stack<List<WebSocketSubscription>> _subscriptions;
+        private SemaphoreLocker _semaphore;
         private readonly Crypto.Exchange.KuCoin _kuCoin;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
         public Connection()
         {
+            _semaphore = new SemaphoreLocker();
+            _subscriptions = new Stack<List<WebSocketSubscription>>();
             _websockets = new List<Manager>();
             _receiveTasks = new List<Task>();
             _kuCoin = new Crypto.Exchange.KuCoin();
@@ -45,7 +50,8 @@ namespace CoinMonitor.Connections.KuCoin
             var pingMessage = JsonConvert.SerializeObject(new { id = Guid.NewGuid().ToString(), type = "ping" });
 
 
-            _websockets.Add(await InitWebsocket(endpoint, token, pingMessage, pingInterval));
+            _websockets.Add(InitWebsocket(endpoint, token, pingMessage, pingInterval));
+            _subscriptions.Push(new List<WebSocketSubscription>());
             int id = 228;
             int subscriptionCount = 0;
             foreach (var coinPair in coinPairs)
@@ -56,7 +62,8 @@ namespace CoinMonitor.Connections.KuCoin
 
                 if (subscriptionCount >= 299)
                 {
-                    _websockets.Add(await InitWebsocket(endpoint, token, pingMessage, pingInterval));
+                    _subscriptions.Push(new List<WebSocketSubscription>());
+                    _websockets.Add(InitWebsocket(endpoint, token, pingMessage, pingInterval));
                     subscriptionCount = coinPair.Count;
                 }
 
@@ -70,12 +77,12 @@ namespace CoinMonitor.Connections.KuCoin
                     IsPrivateChannel = false,
                     IsResponse = false
                 };
-                Thread.Sleep(250);
-                await _websockets.Last().Send(JsonConvert.SerializeObject(subscription));
+
+                _subscriptions.Peek().Add(subscription);
             }
 
             foreach (var websocket in _websockets)
-                _receiveTasks.Add(websocket.StartReceiving());
+                _receiveTasks.Add(websocket.Start());
 
             await Task.WhenAll(_receiveTasks);
         }
@@ -106,13 +113,27 @@ namespace CoinMonitor.Connections.KuCoin
             PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Data.Price, "KuCoin"));
         }
 
-        private async Task<Manager> InitWebsocket(string endpoint, string token, string pingMessage, double pingInterval)
+        private Manager InitWebsocket(string endpoint, string token, string pingMessage, double pingInterval)
         {
             var url = endpoint + "?token=" + token + "&connectId=" + Guid.NewGuid();
             var manager = new Manager(url, true, pingMessage, pingInterval);
             manager.MessageReceived += WebsocketOnMessageReceived;
-            await manager.Connect();
+            manager.OnConnected += ManagerOnOnConnected;
             return manager;
+        }
+
+        private async void ManagerOnOnConnected(object sender, EventArgs e)
+        {
+            var subscription = await _semaphore.LockAsync(() => Task.FromResult(_subscriptions.Pop()));
+            var socket = sender as Manager;
+            if (socket == null) 
+                return;
+
+            foreach (var webSocketSubscription in subscription)
+            {
+                Thread.Sleep(250);
+                await socket.Send(JsonConvert.SerializeObject(webSocketSubscription));
+            }
         }
     }
 }

@@ -23,14 +23,14 @@ namespace CoinMonitor.Connections.Kraken
             };
             _websocket = new Manager("wss://ws.kraken.com", pingMessage: pingMessage.ToString());
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _websocket.OnConnected += WebsocketOnOnConnected;
             _kraken = new Crypto.Exchange.Kraken();
         }
 
-        public async Task StartAsync()
+        private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
             var requestParams = _kraken.SupportedPairs.Select(pair => $"{pair.Base}/{pair.Quote}").ToList();
 
-            await _websocket.Connect();
             var subscription = new WebSocketSubscription
             {
                 Event = "subscribe",
@@ -38,8 +38,11 @@ namespace CoinMonitor.Connections.Kraken
                 Subscription = new Subscription { Name = "ticker" }
             };
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
+        }
 
-            await _websocket.StartReceiving();
+        public async Task StartAsync()
+        {
+            await _websocket.Start();
         }
 
         public IExchange GetExchange()

@@ -20,14 +20,24 @@ namespace CoinMonitor.Connections.CoinBase
         {
             _websocket = new Manager("wss://ws-feed.exchange.coinbase.com", false);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _websocket.OnConnected += WebsocketOnOnConnected;
             _coinBase = new Crypto.Exchange.CoinBase();
         }
 
         public async Task StartAsync()
         {
+            await _websocket.Start();
+        }
+
+        public IExchange GetExchange()
+        {
+            return _coinBase;
+        }
+
+        private async void WebsocketOnOnConnected(object sender, EventArgs e)
+        {
             var productIds = _coinBase.SupportedPairs.Select(pair => $"{pair.Base}-{pair.Quote}").ToList();
 
-            await _websocket.Connect();
             var subscription = new WebSocketSubscription
             {
                 Type = "subscribe",
@@ -35,13 +45,6 @@ namespace CoinMonitor.Connections.CoinBase
                 Channels = new List<string> { "ticker" }
             };
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
-
-            await _websocket.StartReceiving();
-        }
-
-        public IExchange GetExchange()
-        {
-            return _coinBase;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)

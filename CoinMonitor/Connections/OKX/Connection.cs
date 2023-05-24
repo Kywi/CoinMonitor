@@ -18,10 +18,21 @@ namespace CoinMonitor.Connections.OKX
         {
             _websocket = new Manager("wss://ws.okx.com:8443/ws/v5/public", false);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _websocket.OnConnected += WebsocketOnOnConnected;
             _okx = new Crypto.Exchange.OKX();
         }
 
         public async Task StartAsync()
+        {
+            await _websocket.Start();
+        }
+
+        public IExchange GetExchange()
+        {
+            return _okx;
+        }
+
+        private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
             var coins = _okx.SupportedPairs.Select(pair => $"{pair.Base}-{pair.Quote}").ToList();
             var args = new ArgsDto[coins.Count];
@@ -31,7 +42,6 @@ namespace CoinMonitor.Connections.OKX
                 args.SetValue(new ArgsDto { Channel = "tickers", InstId = coin }, i++);
             }
 
-            await _websocket.Connect();
             var subscription = new WebSocketSubscriptionDto
             {
                 Operation = "subscribe",
@@ -40,13 +50,6 @@ namespace CoinMonitor.Connections.OKX
             };
 
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
-
-            await _websocket.StartReceiving();
-        }
-
-        public IExchange GetExchange()
-        {
-            return _okx;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)

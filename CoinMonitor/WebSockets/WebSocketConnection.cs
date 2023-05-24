@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -8,17 +9,23 @@ using CoinMonitor.Utils;
 
 namespace CoinMonitor.WebSockets
 {
-    public class WebSocketConnection
+    public class WebSocketConnection : IDisposable
     {
         private readonly string _baseUrl;
-        private readonly ClientWebSocket _socket;
         private readonly SemaphoreLocker _semaphore;
-        
+        private ClientWebSocket _socket;
+
         public WebSocketConnection(string baseUrl)
         {
             _semaphore = new SemaphoreLocker();
             _socket = new ClientWebSocket();
             _baseUrl = baseUrl;
+        }
+
+        public void Dispose()
+        {
+            _socket.Dispose();
+            _socket = null;
         }
 
         public async Task Connect()
@@ -33,6 +40,9 @@ namespace CoinMonitor.WebSockets
 
         public async Task Send(string text)
         {
+            if (!IsOpen())
+                return;
+
             var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(text));
             await _semaphore.LockAsync(async () => await _socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None));
         }

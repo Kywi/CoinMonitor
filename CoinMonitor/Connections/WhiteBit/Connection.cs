@@ -25,14 +25,24 @@ namespace CoinMonitor.Connections.WhiteBit
             };
             _websocket = new Manager("wss://api.whitebit.com/ws", pingMessage: pingMessage.ToString());
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _websocket.OnConnected += WebsocketOnOnConnected;
             _whiteBit = new Crypto.Exchange.WhiteBit();
         }
 
         public async Task StartAsync()
         {
+            await _websocket.Start();
+        }
+
+        public IExchange GetExchange()
+        {
+            return _whiteBit;
+        }
+
+        private async void WebsocketOnOnConnected(object sender, EventArgs e)
+        {
             var requestParams = _whiteBit.SupportedPairs.Select(pair => $"{pair.Base}_{pair.Quote}").ToList();
 
-            await _websocket.Connect();
             var subscription = new WebSocketSubscription
             {
                 Method = "lastprice_subscribe",
@@ -40,13 +50,6 @@ namespace CoinMonitor.Connections.WhiteBit
                 Id = 1
             };
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
-
-            await _websocket.StartReceiving();
-        }
-
-        public IExchange GetExchange()
-        {
-            return _whiteBit;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)

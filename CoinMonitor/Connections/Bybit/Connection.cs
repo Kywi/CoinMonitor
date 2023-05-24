@@ -20,14 +20,24 @@ namespace CoinMonitor.Connections.Bybit
         {
             _websocket = new Manager("wss://stream.bybit.com/v5/public/spot", pingMessage: JsonConvert.SerializeObject(new { op = "ping" }), pingInterval: 10000);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
+            _websocket.OnConnected += WebsocketOnOnConnected;
             _bybit = new Crypto.Exchange.Bybit();
         }
 
         public async Task StartAsync()
         {
+            await _websocket.Start();
+        }
+
+        public IExchange GetExchange()
+        {
+            return _bybit;
+        }
+
+        private async void WebsocketOnOnConnected(object sender, EventArgs e)
+        {
             var paramsForRequests = CollectionsHelpers.SplitList(_bybit.SupportedPairs.Select(pair => $"tickers.{pair.Base}{pair.Quote}").ToList(), 10);
 
-            await _websocket.Connect();
             foreach (var paramsForRequest in paramsForRequests)
             {
                 var subscription = new WebSocketSubscriptionDto
@@ -39,13 +49,6 @@ namespace CoinMonitor.Connections.Bybit
                 Thread.Sleep(250); // Don`t send to many request for single connection at small period of time
                 await _websocket.Send(JsonConvert.SerializeObject(subscription));
             }
-
-            await _websocket.StartReceiving();
-        }
-
-        public IExchange GetExchange()
-        {
-            return _bybit;
         }
 
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
