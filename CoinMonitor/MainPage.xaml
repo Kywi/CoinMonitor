@@ -32,15 +32,6 @@
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>
-                <controls:DataGridTemplateColumn Header="CoinBase" >
-                    <controls:DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border Background="{Binding Colors[CoinBase]}">
-                                <TextBlock Text="{Binding CoinsPricesView[CoinBase]}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </DataTemplate>
-                    </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>
                 <controls:DataGridTemplateColumn Header="Kraken" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

@@ -63,9 +63,6 @@
     <Compile Include="Connections\KuCoin\Data.cs" />
     <Compile Include="Connections\KuCoin\TickerDto.cs" />
     <Compile Include="Connections\KuCoin\WebSocketSubscription.cs" />
-    <Compile Include="Connections\CoinBase\Connection.cs" />
-    <Compile Include="Connections\CoinBase\TickerDto.cs" />
-    <Compile Include="Connections\CoinBase\WebSocketSubscription.cs" />
     <Compile Include="Connections\Kraken\Connection.cs" />
     <Compile Include="Connections\Kraken\Subscription.cs" />
     <Compile Include="Connections\Kraken\TickerDto.cs" />
