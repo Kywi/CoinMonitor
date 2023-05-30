@@ -12,13 +12,13 @@ namespace CoinMonitor.Connections
         private readonly List<IConnectionManager> _connections = new List<IConnectionManager>();
         private readonly Crypto.Manager _cryptoManager;
 
-        private readonly List<Task> _tasks = new();
+        private readonly List<Task> _tasks;
 
         public ConnectionsManager(EventHandler<PriceChangedEventArgs> priceUpdate)
         {
             _connections.Add(new Binance.Connection());
             _connections.Add(new WhiteBit.Connection());
-            _connections.Add(new Bybit.Connection());
+            // _connections.Add(new Bybit.Connection());
             _connections.Add(new Kraken.Connection());
             _connections.Add(new OKX.Connection());
             _connections.Add(new KuCoin.Connection());
@@ -31,6 +31,7 @@ namespace CoinMonitor.Connections
             }
 
             _cryptoManager = new Manager(exchangeList);
+            _tasks = new List<Task>();
         }
 
         public async void Connect()

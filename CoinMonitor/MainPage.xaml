@@ -14,7 +14,7 @@
             <controls:DataGrid.Columns >
                 <controls:DataGridTextColumn Header="Coin name" Binding="{Binding Name}" CanUserSort="True"/>
                 <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinsPricesView[Binance]}" />
-                <controls:DataGridTemplateColumn Header="Bybit" >
+                <!--<controls:DataGridTemplateColumn Header="Bybit" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border Background="{Binding Colors[Bybit]}">
@@ -22,7 +22,7 @@
                             </Border>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>
+                </controls:DataGridTemplateColumn>-->
                 <controls:DataGridTemplateColumn Header="WhiteBit" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
