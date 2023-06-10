@@ -10,10 +10,28 @@
     xmlns:models="using:CoinMonitor.Models"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Grid>
-        <controls:DataGrid x:Name="MonitoringDataGrid" CanUserSortColumns="True" ItemsSource="{x:Bind Path=Coins.Values, Mode=OneWay}" AutoGenerateColumns="False" IsReadOnly="True" FontSize="30" FontFamily="Arial Black" RowHeight="32" GridLinesVisibility="Horizontal" >
+        <controls:DataGrid x:Name="MonitoringDataGrid" CanUserSortColumns="True" ItemsSource="{x:Bind Path=Coins.Values, Mode=OneWay}" AutoGenerateColumns="False" IsReadOnly="True" FontSize="30" FontFamily="Arial Black" RowHeight="46" GridLinesVisibility="Horizontal" >
             <controls:DataGrid.Columns >
                 <controls:DataGridTextColumn Header="Coin name" Binding="{Binding Name}" CanUserSort="True"/>
-                <controls:DataGridTextColumn Header="Binance" Binding="{Binding CoinsPricesView[Binance]}" />
+                <controls:DataGridTemplateColumn Header="Binance">
+                    <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid DataContext="{Binding CoinsPricesView[Binance]}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" Background="{Binding AskBrush}">
+                                    <TextBlock Text="{Binding Ask}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <Border Grid.Row="1" Background="{Binding BidBrush}">
+                                    <TextBlock Text="{Binding Bid}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                </controls:DataGridTemplateColumn>
+
                 <!--<controls:DataGridTemplateColumn Header="Bybit" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -23,16 +41,25 @@
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>-->
-                <controls:DataGridTemplateColumn Header="WhiteBit" >
+                <!--<controls:DataGridTemplateColumn Header="WhiteBit" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Border Background="{Binding Colors[WhiteBit]}">
-                                <TextBlock Text="{Binding CoinsPricesView[WhiteBit]}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" Background="{Binding CoinsPricesView[WhiteBit].AskBrush}">
+                                    <TextBlock Text="{Binding CoinsPricesView[WhiteBit].Ask}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <Border Grid.Row="1" Background="{Binding CoinsPricesView[WhiteBit].BidBrush}">
+                                    <TextBlock Text="{Binding CoinsPricesView[WhiteBit].Bid}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>
-                <controls:DataGridTemplateColumn Header="Kraken" >
+                </controls:DataGridTemplateColumn>-->
+                <!--<controls:DataGridTemplateColumn Header="Kraken" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border Background="{Binding Colors[Kraken]}">
@@ -58,7 +85,7 @@
                             </Border>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>
+                </controls:DataGridTemplateColumn>-->
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>

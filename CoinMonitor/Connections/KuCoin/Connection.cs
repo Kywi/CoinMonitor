@@ -110,7 +110,7 @@ namespace CoinMonitor.Connections.KuCoin
 
             var coinName = update.Topic.Split(':')[1].Split('-')[0];
 
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Data.Price, "KuCoin"));
+          //  PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Data.Price, "KuCoin"));
         }
 
         private Manager InitWebsocket(string endpoint, string token, string pingMessage, double pingInterval)

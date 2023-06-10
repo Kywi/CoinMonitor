@@ -69,7 +69,7 @@ namespace CoinMonitor.Connections.Bybit
 
             var tradingPair = update.Data.TradingPair;
             var coinName = tradingPair.Substring(0, tradingPair.Length - 4);
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Data.ClosePrice), "Bybit"));
+           // PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Data.ClosePrice), "Bybit"));
         }
     }
 }

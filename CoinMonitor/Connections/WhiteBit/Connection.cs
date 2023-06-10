@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,12 +42,16 @@ namespace CoinMonitor.Connections.WhiteBit
 
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
-            var requestParams = _whiteBit.SupportedPairs.Select(pair => $"{pair.Base}_{pair.Quote}").ToList();
-
+            //   var requestParams = _whiteBit.SupportedPairs.Select(pair => $"{pair.Base}_{pair.Quote}").ToList();
+            var symbols = new List<string> { "BTC_USDT"};
+            List<object> r = symbols.Cast<object>().ToList();
+            r.Add(1);
+            r.Add("0");
+            r.Add(true);
             var subscription = new WebSocketSubscription
             {
-                Method = "lastprice_subscribe",
-                Params = requestParams,
+                Method = "depth_subscribe",
+                Params = r,
                 Id = 1
             };
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
@@ -69,7 +74,7 @@ namespace CoinMonitor.Connections.WhiteBit
                 return;
 
             var coinName = update.Params[0].Substring(0, update.Params[0].Length - 5);
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, decimal.Parse(update.Params[1], NumberStyles.Float), "WhiteBit"));
+            // PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, decimal.Parse(update.Params[1], NumberStyles.Float), "WhiteBit"));
         }
     }
 }

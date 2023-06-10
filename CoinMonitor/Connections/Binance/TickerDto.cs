@@ -7,10 +7,17 @@ namespace CoinMonitor.Connections.Binance
         [JsonProperty("s")]
         public string Symbol { get; set; }
 
-        [JsonProperty("c")]
-        public decimal Price { get; set; }
+        [JsonProperty("b")]
+        public decimal Bid { get; set; }
 
-        [JsonProperty("C")]
-        public double CloseTime { get; set; }
+        [JsonProperty("a")]
+        public decimal Ask { get; set; }
+
+        [JsonProperty("B")]
+        public decimal BidQty { get; set; }
+
+        [JsonProperty("A")]
+        public decimal AskQty { get; set; }
+
     }
 }

@@ -76,7 +76,7 @@ namespace CoinMonitor.Connections.Kraken
                 return;
 
             coinName = coinName.Split('/')[0];
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Price[0], "Kraken"));
+          //  PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Price[0], "Kraken"));
         }
     }
 }

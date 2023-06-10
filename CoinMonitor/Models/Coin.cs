@@ -13,9 +13,8 @@ namespace CoinMonitor.Models
     public class Coin : INotifyPropertyChanged
     {
         private string _name = "";
-        private ObservableStringDictionary<decimal> _coinsPricesView = new ObservableStringDictionary<decimal>();
-        private ObservableStringDictionary<decimal> _coinsPrices = new ObservableStringDictionary<decimal>();
-        private ObservableStringDictionary<Brush> _colors = new ObservableStringDictionary<Brush>();
+        private ObservableStringDictionary<BidAsk> _coinsPricesView = new();
+        private ObservableStringDictionary<BidAsk> _coinsPrices = new();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -24,9 +23,8 @@ namespace CoinMonitor.Models
             Name = name;
             foreach (var exchange in Crypto.Manager.SupportedExchanges)
             {
-                _coinsPrices[exchange] = 0;
-                _coinsPricesView[exchange] = 0;
-                _colors[exchange] = new SolidColorBrush(Windows.UI.Colors.White); ;
+                _coinsPrices[exchange] = new BidAsk();
+                _coinsPricesView[exchange] = new BidAsk();
             }
 
             _coinsPrices.DictionaryChanged += CoinsPricesOnDictionaryChanged;
@@ -37,15 +35,17 @@ namespace CoinMonitor.Models
             if (e.Action != NotifyCollectionChangedAction.Reset)
                 return;
 
+            var changedItem = (BidAsk)e.AddedItem;
+
             if ((string)e.AddedKey == "Binance")
             {
-                _coinsPricesView["Binance"] = (decimal)e.AddedItem;
+                _coinsPricesView["Binance"] = changedItem;
 
-                foreach (var coin in _coinsPricesView.Keys.ToList().Where(coin => coin != "Binance"))
-                    _coinsPricesView[coin] = CalculatePercentage((decimal)e.AddedItem, _coinsPrices[coin], coin);
+                foreach (var exchangeName in _coinsPricesView.Keys.ToList().Where(coin => coin != "Binance"))
+                    CalculateBidAsk(_coinsPricesView[exchangeName], changedItem, _coinsPrices[exchangeName]);
             }
             else
-                _coinsPricesView[(string)e.AddedKey] = CalculatePercentage(_coinsPrices["Binance"], (decimal)e.AddedItem, (string)e.AddedKey);
+                CalculateBidAsk(_coinsPricesView[(string)e.AddedKey], _coinsPrices["Binance"], changedItem);
         }
 
         public string Name
@@ -54,22 +54,16 @@ namespace CoinMonitor.Models
             set => SetField(ref _name, value);
         }
 
-        public ObservableStringDictionary<decimal> CoinPrices
+        public ObservableStringDictionary<BidAsk> CoinPrices
         {
             get => _coinsPrices;
             set => SetField(ref _coinsPrices, value);
         }
 
-        public ObservableStringDictionary<decimal> CoinsPricesView
+        public ObservableStringDictionary<BidAsk> CoinsPricesView
         {
             get => _coinsPricesView;
             set => SetField(ref _coinsPricesView, value);
-        }
-
-        public ObservableStringDictionary<Brush> Colors
-        {
-            get => _colors;
-            set => SetField(ref _colors, value);
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -87,25 +81,38 @@ namespace CoinMonitor.Models
             return true;
         }
 
-        private decimal CalculatePercentage(decimal price, decimal coin, string exchangeName)
+        private void CalculateBidAsk(BidAsk viewValue, BidAsk main, BidAsk depend)
         {
-            if (price == 0 || coin == 0) return 0;
+            viewValue.Ask = CalculatePercentage(main.Ask, depend.Ask);
+            viewValue.Bid = CalculatePercentage(main.Bid, depend.Bid);
+            viewValue.AskBrush = CalculateBrush(viewValue.Ask);
+            viewValue.BidBrush = CalculateBrush(viewValue.Bid);
+        }
+
+        private decimal CalculatePercentage(decimal price, decimal coin)
+        {
+            if (price == 0 || coin == 0)
+                return 0;
+
             var result = Math.Round((coin * 100 / price) - 100, 2);
 
+            return result;
+        }
+
+        private Brush CalculateBrush(decimal price)
+        {
             var brush = new SolidColorBrush
             {
-                Opacity = Convert.ToDouble(Math.Abs(result)) / 0.3 * 0.15
+                Opacity = Convert.ToDouble(Math.Abs(price)) / 0.3 * 0.15
             };
-            if (result > 0)
+            if (price > 0)
                 brush.Color = Windows.UI.Colors.Green;
-            else if (result == 0)
+            else if (price == 0)
                 brush.Color = Windows.UI.Colors.White;
             else
                 brush.Color = Windows.UI.Colors.Red;
 
-            _colors[exchangeName] = brush;
-
-            return result;
+            return brush;
         }
     }
 }

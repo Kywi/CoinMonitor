@@ -24,12 +24,26 @@ namespace CoinMonitor
         private void PriceUpdate(object sender, PriceChangedEventArgs e)
         {
             if (Coins.TryGetValue(e.Symbol, out var coin))
-                coin.CoinPrices[e.ExchangeName] = e.Price;
+            {
+                var bidAsk = coin.CoinPrices[e.ExchangeName];
+                if (e.Ask.HasValue)
+                    bidAsk.Ask = e.Ask.Value;
+                if (e.Bid.HasValue)
+                    bidAsk.Bid = e.Bid.Value;
+
+                coin.CoinPrices[e.ExchangeName] = bidAsk;
+            }
             else
             {
                 var newCoin = new Coin(e.Symbol);
                 Coins[e.Symbol] = newCoin;
-                newCoin.CoinPrices[e.ExchangeName] = e.Price;
+                var bidAsk = newCoin.CoinPrices[e.ExchangeName];
+                if (e.Ask.HasValue)
+                    bidAsk.Ask = e.Ask.Value;
+                if (e.Bid.HasValue)
+                    bidAsk.Bid = e.Bid.Value;
+
+                newCoin.CoinPrices[e.ExchangeName] = bidAsk;
             }
         }
 
