@@ -36,7 +36,7 @@ namespace CoinMonitor.Connections
 
         public async void Connect()
         {
-            //await _cryptoManager.CalculateSupportedPairs();
+            await _cryptoManager.CalculateSupportedPairs();
             foreach (var socketManager in _connections)
                 _tasks.Add(socketManager.StartAsync());
         }

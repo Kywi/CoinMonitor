@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CoinMonitor.Crypto.Exchange;
 using CoinMonitor.WebSockets;
@@ -42,27 +43,33 @@ namespace CoinMonitor.Connections.WhiteBit
 
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
-            //   var requestParams = _whiteBit.SupportedPairs.Select(pair => $"{pair.Base}_{pair.Quote}").ToList();
-            var symbols = new List<string> { "BTC_USDT"};
-            List<object> r = symbols.Cast<object>().ToList();
-            r.Add(1);
-            r.Add("0");
-            r.Add(true);
-            var subscription = new WebSocketSubscription
+            var pairs = _whiteBit.SupportedPairs.Select(pair => $"{pair.Base}_{pair.Quote}").ToList();
+            foreach (var pair in pairs)
             {
-                Method = "depth_subscribe",
-                Params = r,
-                Id = 1
-            };
-            await _websocket.Send(JsonConvert.SerializeObject(subscription));
+                var @params = new List<object> { pair, 1, "0", true };
+                var subscription = new WebSocketSubscription
+                {
+                    Method = "depth_subscribe",
+                    Params = @params,
+                    Id = 1
+                };
+                await _websocket.Send(JsonConvert.SerializeObject(subscription));
+            }
         }
-
         private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
+            if (e.Message.Contains("failed"))
+                throw new Exception("Failed to subscribe message=" + e.Message);
+
+            if (e.Message.Contains("result"))
+                return;
+
+            BidAskDto priceUpdate;
             TickerDto update;
             try
             {
                 update = JsonConvert.DeserializeObject<TickerDto>(e.Message);
+                priceUpdate = JsonConvert.DeserializeObject<BidAskDto>(update.Params[1].ToString());
             }
             catch (Exception ex)
             {
@@ -73,8 +80,18 @@ namespace CoinMonitor.Connections.WhiteBit
             if (update?.Params == null)
                 return;
 
-            var coinName = update.Params[0].Substring(0, update.Params[0].Length - 5);
-            // PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, decimal.Parse(update.Params[1], NumberStyles.Float), "WhiteBit"));
+            if (priceUpdate == null)
+                return;
+
+            decimal? bid = null;
+            decimal? ask = null;
+            if (priceUpdate.Ask != null)
+                ask = decimal.Parse(priceUpdate.Ask[0][0], NumberStyles.Float);
+            if (priceUpdate.Bid != null)
+                bid = decimal.Parse(priceUpdate.Bid[0][0], NumberStyles.Float);
+
+            var coinName = update.Params[2].ToString().Split("_")[0];
+            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, bid, ask, "WhiteBit"));
         }
     }
 }

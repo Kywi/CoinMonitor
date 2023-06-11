@@ -41,7 +41,7 @@
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>-->
-                <!--<controls:DataGridTemplateColumn Header="WhiteBit" >
+                <controls:DataGridTemplateColumn Header="WhiteBit" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
@@ -58,7 +58,7 @@
                             </Grid>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>-->
+                </controls:DataGridTemplateColumn>
                 <!--<controls:DataGridTemplateColumn Header="Kraken" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

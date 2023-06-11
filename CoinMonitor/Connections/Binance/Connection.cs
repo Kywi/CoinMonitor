@@ -35,8 +35,7 @@ namespace CoinMonitor.Connections.Binance
 
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
-            //  var requestParams = _binance.SupportedPairs.Select(pair => $"{pair.Base.ToLower()}{pair.Quote.ToLower()}@bookTicker").ToList();
-            var requestParams = new List<string> { "btcusdt@bookTicker", "alphausdt@bookTicker", "radusdt@bookTicker" };
+            var requestParams = _binance.SupportedPairs.Select(pair => $"{pair.Base.ToLower()}{pair.Quote.ToLower()}@bookTicker").ToList();
             var subscription = new WebSocketSubscriptionDto
             {
                 Method = "SUBSCRIBE",
@@ -64,7 +63,7 @@ namespace CoinMonitor.Connections.Binance
                 return;
 
             var coinName = update.Symbol.Substring(0, update.Symbol.Length - 4);
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Bid, update.Ask, "Binance"));
+            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Ask, update.Bid, "Binance"));
         }
     }
 }
