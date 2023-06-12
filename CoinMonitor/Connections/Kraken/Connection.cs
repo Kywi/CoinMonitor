@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace CoinMonitor.Connections.Kraken
             {
                 Event = "subscribe",
                 Pairs = requestParams,
-                Subscription = new Subscription { Name = "ticker" }
+                Subscription = new Subscription { Name = "book", Depth = 10 }
             };
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
         }
@@ -72,11 +73,15 @@ namespace CoinMonitor.Connections.Kraken
                 return;
             }
 
-            if (update?.Price == null)
-                return;
+            decimal? bid = null;
+            decimal? ask = null;
+            if (update.Ask != null)
+                ask = update.Ask[0][0];
+            if (update.Bid != null)
+                bid = update.Bid[0][0];
 
             coinName = coinName.Split('/')[0];
-          //  PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Price[0], "Kraken"));
+            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, bid, ask, "Kraken"));
         }
     }
 }

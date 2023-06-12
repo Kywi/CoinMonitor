@@ -5,7 +5,10 @@ namespace CoinMonitor.Connections.Kraken
 {
     public class TickerDto
     {
-        [JsonProperty("c")]
-        public List<decimal> Price { get; set; }
+        [JsonProperty("as")]
+        public List<List<decimal>> Ask { get; set; }
+
+        [JsonProperty("bs")]
+        public List<List<decimal>> Bid { get; set; }
     }
 }

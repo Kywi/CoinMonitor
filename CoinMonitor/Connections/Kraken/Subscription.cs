@@ -6,5 +6,8 @@ namespace CoinMonitor.Connections.Kraken
     {
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        [JsonProperty("depth")]
+        public int Depth { get; set; }
     }
 }

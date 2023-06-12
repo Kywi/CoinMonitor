@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Windows.UI.Xaml.Media;
-using CoinMonitor.WebSockets;
 using ObservableDictionary;
 
 namespace CoinMonitor.Models

@@ -59,16 +59,25 @@
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>
-                <!--<controls:DataGridTemplateColumn Header="Kraken" >
+                <controls:DataGridTemplateColumn Header="Kraken" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Border Background="{Binding Colors[Kraken]}">
-                                <TextBlock Text="{Binding CoinsPricesView[Kraken]}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" Background="{Binding CoinsPricesView[Kraken].AskBrush}">
+                                    <TextBlock Text="{Binding CoinsPricesView[Kraken].Ask}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <Border Grid.Row="1" Background="{Binding CoinsPricesView[Kraken].BidBrush}">
+                                    <TextBlock Text="{Binding CoinsPricesView[Kraken].Bid}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>
-                <controls:DataGridTemplateColumn Header="OKX" >
+                <!--<controls:DataGridTemplateColumn Header="OKX" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border Background="{Binding Colors[OKX]}">
