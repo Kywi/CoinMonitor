@@ -26,8 +26,11 @@ namespace CoinMonitor.WebSockets
 
         public void Dispose()
         {
-            _pinger.Dispose();
-            _pinger = null;
+            if (_pinger != null)
+            {
+                _pinger.Dispose();
+                _pinger = null;
+            }
             _connection.Dispose();
             _connection = null;
         }
