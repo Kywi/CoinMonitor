@@ -31,6 +31,11 @@ namespace CoinMonitor.Connections.WhiteBit
             _whiteBit = new Crypto.Exchange.WhiteBit();
         }
 
+        public void Dispose()
+        {
+            _websocket.Dispose();
+        }
+
         public async Task StartAsync()
         {
             await _websocket.Start();

@@ -49,7 +49,7 @@ namespace CoinMonitor.WebSockets
 
         public bool IsOpen()
         {
-            return _socket.State == WebSocketState.Open;
+            return _socket is { State: WebSocketState.Open };
         }
 
         public async Task<string> ReceiveMessage()

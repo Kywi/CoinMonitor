@@ -33,6 +33,12 @@ namespace CoinMonitor.Connections.KuCoin
             _kuCoin = new Crypto.Exchange.KuCoin();
         }
 
+        public void Dispose()
+        {
+            foreach (var websocket in _websockets)
+                websocket.Dispose();
+        }
+
         public async Task StartAsync()
         {
             var coinPairs = Utils.CollectionsHelpers.SplitList(_kuCoin.SupportedPairs.Select(pair => $"{pair.Base}-{pair.Quote}").ToList(), 99);

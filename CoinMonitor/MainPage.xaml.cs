@@ -3,6 +3,7 @@ using Windows.UI.Xaml.Navigation;
 using System.Collections.Concurrent;
 using CoinMonitor.Connections;
 using CoinMonitor.Models;
+using Windows.UI.Core.Preview;
 
 namespace CoinMonitor
 {
@@ -19,6 +20,12 @@ namespace CoinMonitor
             Coins["BTC"] = new Coin("BTC");
             Coins["ETH"] = new Coin("ETH");
             _connectionsManager = new ConnectionsManager(PriceUpdate);
+            SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += this.OnCloseRequest;
+        }
+
+        private void OnCloseRequest(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
+        {
+            _connectionsManager.Dispose();
         }
 
         private void PriceUpdate(object sender, PriceChangedEventArgs e)

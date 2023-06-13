@@ -7,7 +7,7 @@ using CoinMonitor.Crypto.Exchange;
 
 namespace CoinMonitor.Connections
 {
-    public class ConnectionsManager
+    public class ConnectionsManager : IDisposable
     {
         private readonly List<IConnectionManager> _connections = new();
         private readonly Crypto.Manager _cryptoManager;
@@ -32,6 +32,12 @@ namespace CoinMonitor.Connections
 
             _cryptoManager = new Manager(exchangeList);
             _tasks = new List<Task>();
+        }
+
+        public void Dispose()
+        {
+            foreach (var connection in _connections)
+                connection.Dispose();
         }
 
         public async void Connect()

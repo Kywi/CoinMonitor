@@ -24,6 +24,11 @@ namespace CoinMonitor.Connections.Bybit
             _bybit = new Crypto.Exchange.Bybit();
         }
 
+        public void Dispose()
+        {
+            _websocket.Dispose();
+        }
+
         public async Task StartAsync()
         {
             await _websocket.Start();

@@ -23,6 +23,11 @@ namespace CoinMonitor.Connections.Binance
             _binance = new Crypto.Exchange.Binance();
         }
 
+        public void Dispose()
+        {
+            _websocket.Dispose();
+        }
+
         public async Task StartAsync()
         {
             await _websocket.Start();

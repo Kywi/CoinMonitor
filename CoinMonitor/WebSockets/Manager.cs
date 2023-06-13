@@ -9,6 +9,7 @@ namespace CoinMonitor.WebSockets
         private readonly bool _ifPingerEnabled;
         private readonly string _pingMessage;
         private readonly double _pingInterval;
+        private bool _isDisposed;
 
         private Pinger _pinger;
         private WebSocketConnection _connection;
@@ -22,10 +23,12 @@ namespace CoinMonitor.WebSockets
             _pingMessage = pingMessage;
             _pingInterval = pingInterval;
             _ifPingerEnabled = ifPingerEnabled;
+            _isDisposed = false;
         }
 
         public void Dispose()
         {
+            _isDisposed = true;
             if (_pinger != null)
             {
                 _pinger.Dispose();
@@ -35,11 +38,6 @@ namespace CoinMonitor.WebSockets
             _connection = null;
         }
 
-        public async Task Close()
-        {
-            await _connection.Close();
-        }
-
         public async Task Send(string text)
         {
             await _connection.Send(text);
@@ -47,7 +45,7 @@ namespace CoinMonitor.WebSockets
 
         public async Task Start()
         {
-            while (true)
+            while (!_isDisposed)
             {
                 try
                 {
@@ -60,13 +58,15 @@ namespace CoinMonitor.WebSockets
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    Dispose();
+                    if (!_isDisposed)
+                        Dispose();
                 }
             }
         }
 
         private void Init()
         {
+            _isDisposed = false;
             _connection = new WebSocketConnection(_url);
             if (_ifPingerEnabled)
                 _pinger = new Pinger(_connection, _pingInterval, _pingMessage);
@@ -80,7 +80,7 @@ namespace CoinMonitor.WebSockets
 
         private async Task StartReceiving()
         {
-            while (_connection.IsOpen())
+            while (_connection != null && _connection.IsOpen())
             {
                 var message = await _connection.ReceiveMessage();
                 if (message != null)

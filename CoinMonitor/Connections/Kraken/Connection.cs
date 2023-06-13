@@ -28,6 +28,11 @@ namespace CoinMonitor.Connections.Kraken
             _kraken = new Crypto.Exchange.Kraken();
         }
 
+        public void Dispose()
+        {
+            _websocket.Dispose();
+        }
+
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
             var requestParams = _kraken.SupportedPairs.Select(pair => $"{pair.Base}/{pair.Quote}").ToList();

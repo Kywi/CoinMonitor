@@ -4,7 +4,7 @@ using CoinMonitor.Crypto.Exchange;
 
 namespace CoinMonitor.Connections
 {
-    public interface IConnectionManager
+    public interface IConnectionManager : IDisposable
     {
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
 

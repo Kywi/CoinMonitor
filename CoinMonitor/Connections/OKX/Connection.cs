@@ -22,6 +22,11 @@ namespace CoinMonitor.Connections.OKX
             _okx = new Crypto.Exchange.OKX();
         }
 
+        public void Dispose()
+        {
+            _websocket.Dispose();
+        }
+
         public async Task StartAsync()
         {
             await _websocket.Start();
@@ -70,7 +75,7 @@ namespace CoinMonitor.Connections.OKX
 
             var tradingPair = update.Data[0].Symbol;
             var coinName = tradingPair.Substring(0, tradingPair.Length - 5);
-          //  PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Data[0].Price), "OKX"));
+            //  PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Data[0].Price), "OKX"));
         }
     }
 }
