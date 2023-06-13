@@ -104,16 +104,16 @@ namespace CoinMonitor.Connections.KuCoin
                 return;
             }
 
-            if (update?.Data == null)
+            if (update?.DataDto == null)
                 return;
 
             var coinName = update.Topic.Split(':')[1].Split('-')[0];
             decimal? bid = null;
             decimal? ask = null;
-            if (update.Data.Ask != null)
-                ask = update.Data.Ask[0][0];
-            if (update.Data.Bid != null)
-                bid = update.Data.Bid[0][0];
+            if (update.DataDto.Ask != null)
+                ask = update.DataDto.Ask[0][0];
+            if (update.DataDto.Bid != null)
+                bid = update.DataDto.Bid[0][0];
 
             PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, bid, ask, "KuCoin"));
         }

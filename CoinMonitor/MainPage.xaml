@@ -31,16 +31,24 @@
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>
-
-                <!--<controls:DataGridTemplateColumn Header="Bybit" >
+                <controls:DataGridTemplateColumn Header="Bybit" >
                     <controls:DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border Background="{Binding Colors[Bybit]}">
-                                <TextBlock Text="{Binding CoinsPricesView[Bybit]}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </DataTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                <Border Grid.Row="0" Background="{Binding CoinsPricesView[Bybit].AskBrush}">
+                                    <TextBlock Text="{Binding CoinsPricesView[Bybit].Ask}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                <Border Grid.Row="1" Background="{Binding CoinsPricesView[Bybit].BidBrush}">
+                                    <TextBlock Text="{Binding CoinsPricesView[Bybit].Bid}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>-->
+                </controls:DataGridTemplateColumn>
                 <controls:DataGridTemplateColumn Header="WhiteBit" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CoinMonitor.Connections.KuCoin;
 
-public class Data
+public class DataDto
 {
     [JsonProperty("bids")]
     public List<List<decimal>> Bid { get; set; }

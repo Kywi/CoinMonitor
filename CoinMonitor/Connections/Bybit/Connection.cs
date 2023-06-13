@@ -36,7 +36,7 @@ namespace CoinMonitor.Connections.Bybit
 
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
-            var paramsForRequests = CollectionsHelpers.SplitList(_bybit.SupportedPairs.Select(pair => $"tickers.{pair.Base}{pair.Quote}").ToList(), 10);
+            var paramsForRequests = CollectionsHelpers.SplitList(_bybit.SupportedPairs.Select(pair => $"orderbook.1.{pair.Base}{pair.Quote}").ToList(), 10);
 
             foreach (var paramsForRequest in paramsForRequests)
             {
@@ -69,7 +69,15 @@ namespace CoinMonitor.Connections.Bybit
 
             var tradingPair = update.Data.TradingPair;
             var coinName = tradingPair.Substring(0, tradingPair.Length - 4);
-           // PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Data.ClosePrice), "Bybit"));
+
+            decimal? bid = null;
+            decimal? ask = null;
+            if (update.Data.Ask is { Count: > 0 })
+                ask = update.Data.Ask[0][0];
+            if (update.Data.Bid is { Count: > 0 })
+                bid = update.Data.Bid[0][0];
+
+            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, bid, ask, "Bybit"));
         }
     }
 }

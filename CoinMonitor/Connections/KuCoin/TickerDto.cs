@@ -9,6 +9,6 @@ namespace CoinMonitor.Connections.KuCoin
         public string Topic { get; set; }
 
         [JsonProperty("data")]
-        public Data Data { get; set; }
+        public DataDto DataDto { get; set; }
     }
 }

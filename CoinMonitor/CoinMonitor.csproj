@@ -59,8 +59,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Connections\Bybit\DataDto.cs" />
     <Compile Include="Connections\KuCoin\Connection.cs" />
-    <Compile Include="Connections\KuCoin\Data.cs" />
+    <Compile Include="Connections\KuCoin\DataDto.cs" />
     <Compile Include="Connections\KuCoin\TickerDto.cs" />
     <Compile Include="Connections\KuCoin\WebSocketSubscription.cs" />
     <Compile Include="Connections\Kraken\Connection.cs" />
