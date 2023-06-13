@@ -49,7 +49,6 @@ namespace CoinMonitor.Connections.KuCoin
             var pingInterval = serverInstance["pingInterval"].ToObject<double>();
             var pingMessage = JsonConvert.SerializeObject(new { id = Guid.NewGuid().ToString(), type = "ping" });
 
-
             _websockets.Add(InitWebsocket(endpoint, token, pingMessage, pingInterval));
             _subscriptions.Push(new List<WebSocketSubscription>());
             int id = 228;
@@ -67,7 +66,7 @@ namespace CoinMonitor.Connections.KuCoin
                     subscriptionCount = coinPair.Count;
                 }
 
-                var topic = coinPair.Aggregate("/market/ticker:", (current, pair) => current + pair + ",");
+                var topic = coinPair.Aggregate("/spotMarket/level2Depth5:", (current, pair) => current + pair + ",");
                 topic = topic.Substring(0, topic.Length - 1);
                 var subscription = new WebSocketSubscription
                 {
@@ -109,8 +108,14 @@ namespace CoinMonitor.Connections.KuCoin
                 return;
 
             var coinName = update.Topic.Split(':')[1].Split('-')[0];
+            decimal? bid = null;
+            decimal? ask = null;
+            if (update.Data.Ask != null)
+                ask = update.Data.Ask[0][0];
+            if (update.Data.Bid != null)
+                bid = update.Data.Bid[0][0];
 
-          //  PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Data.Price, "KuCoin"));
+            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, bid, ask, "KuCoin"));
         }
 
         private Manager InitWebsocket(string endpoint, string token, string pingMessage, double pingInterval)
@@ -126,7 +131,7 @@ namespace CoinMonitor.Connections.KuCoin
         {
             var subscription = await _semaphore.LockAsync(() => Task.FromResult(_subscriptions.Pop()));
             var socket = sender as Manager;
-            if (socket == null) 
+            if (socket == null)
                 return;
 
             foreach (var webSocketSubscription in subscription)

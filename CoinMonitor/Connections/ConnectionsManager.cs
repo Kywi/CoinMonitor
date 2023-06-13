@@ -9,7 +9,7 @@ namespace CoinMonitor.Connections
 {
     public class ConnectionsManager
     {
-        private readonly List<IConnectionManager> _connections = new List<IConnectionManager>();
+        private readonly List<IConnectionManager> _connections = new();
         private readonly Crypto.Manager _cryptoManager;
 
         private readonly List<Task> _tasks;
@@ -21,7 +21,7 @@ namespace CoinMonitor.Connections
             //_connections.Add(new Bybit.Connection());
             _connections.Add(new Kraken.Connection());
             //_connections.Add(new OKX.Connection());
-            //_connections.Add(new KuCoin.Connection());
+            _connections.Add(new KuCoin.Connection());
 
             var exchangeList = new List<IExchange>();
             foreach (var socketManager in _connections)
