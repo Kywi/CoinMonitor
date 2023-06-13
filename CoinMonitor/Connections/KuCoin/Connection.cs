@@ -18,15 +18,16 @@ namespace CoinMonitor.Connections.KuCoin
     {
         private List<Manager> _websockets;
         private List<Task> _receiveTasks;
-        private Stack<List<WebSocketSubscription>> _subscriptions;
+        private List<List<WebSocketSubscription>> _subscriptions;
         private SemaphoreLocker _semaphore;
         private readonly Crypto.Exchange.KuCoin _kuCoin;
+        private int _subscriptionIndex = 0;
 
         public event EventHandler<PriceChangedEventArgs> PriceUpdate;
         public Connection()
         {
             _semaphore = new SemaphoreLocker();
-            _subscriptions = new Stack<List<WebSocketSubscription>>();
+            _subscriptions = new List<List<WebSocketSubscription>>();
             _websockets = new List<Manager>();
             _receiveTasks = new List<Task>();
             _kuCoin = new Crypto.Exchange.KuCoin();
@@ -50,7 +51,7 @@ namespace CoinMonitor.Connections.KuCoin
             var pingMessage = JsonConvert.SerializeObject(new { id = Guid.NewGuid().ToString(), type = "ping" });
 
             _websockets.Add(InitWebsocket(endpoint, token, pingMessage, pingInterval));
-            _subscriptions.Push(new List<WebSocketSubscription>());
+            _subscriptions.Add(new List<WebSocketSubscription>());
             int id = 228;
             int subscriptionCount = 0;
             foreach (var coinPair in coinPairs)
@@ -61,7 +62,7 @@ namespace CoinMonitor.Connections.KuCoin
 
                 if (subscriptionCount >= 299)
                 {
-                    _subscriptions.Push(new List<WebSocketSubscription>());
+                    _subscriptions.Add(new List<WebSocketSubscription>());
                     _websockets.Add(InitWebsocket(endpoint, token, pingMessage, pingInterval));
                     subscriptionCount = coinPair.Count;
                 }
@@ -77,12 +78,11 @@ namespace CoinMonitor.Connections.KuCoin
                     IsResponse = false
                 };
 
-                _subscriptions.Peek().Add(subscription);
+                _subscriptions[0].Add(subscription);
             }
 
             foreach (var websocket in _websockets)
                 _receiveTasks.Add(websocket.Start());
-
             await Task.WhenAll(_receiveTasks);
         }
 
@@ -129,7 +129,13 @@ namespace CoinMonitor.Connections.KuCoin
 
         private async void ManagerOnOnConnected(object sender, EventArgs e)
         {
-            var subscription = await _semaphore.LockAsync(() => Task.FromResult(_subscriptions.Pop()));
+            var subscription = await _semaphore.LockAsync(() =>
+            {
+                if (_subscriptionIndex >= _subscriptions.Count)
+                    _subscriptionIndex = 0;
+                return Task.FromResult(_subscriptions[_subscriptionIndex++]);
+            });
+
             var socket = sender as Manager;
             if (socket == null)
                 return;
