@@ -7,8 +7,17 @@ namespace CoinMonitor.Connections.OKX
         [JsonProperty("instId")]
         public string Symbol { get; set; }
 
-        [JsonProperty("last")]
-        public decimal Price { get; set; }
+        [JsonProperty("bidPx")]
+        public decimal Bid { get; set; }
+
+        [JsonProperty("bidSz")]
+        public decimal BidSz { get; set; }
+
+        [JsonProperty("askPx")]
+        public decimal Ask { get; set; }
+
+        [JsonProperty("askSz")]
+        public decimal AskSz { get; set; }
     }
     public class TickerDto
     {

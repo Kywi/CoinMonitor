@@ -75,7 +75,7 @@ namespace CoinMonitor.Connections.OKX
 
             var tradingPair = update.Data[0].Symbol;
             var coinName = tradingPair.Substring(0, tradingPair.Length - 5);
-            //  PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, Convert.ToDecimal(update.Data[0].Price), "OKX"));
+            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Data[0].Ask, update.Data[0].Bid, "OKX"));
         }
     }
 }

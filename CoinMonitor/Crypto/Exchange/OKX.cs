@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CoinMonitor.Crypto.Exchange
@@ -28,9 +26,11 @@ namespace CoinMonitor.Crypto.Exchange
         public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();
+
             var response = await client.GetAsync(_url);
 
             var content = await response.Content.ReadAsStringAsync();
+
             var symbols = JObject.Parse(content);
             var result = (JArray)symbols["data"];
 

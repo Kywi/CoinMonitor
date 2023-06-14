@@ -85,15 +85,24 @@
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>
-                <!--<controls:DataGridTemplateColumn Header="OKX" >
+                <controls:DataGridTemplateColumn Header="OKX" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Border Background="{Binding Colors[OKX]}">
-                                <TextBlock Text="{Binding CoinsPricesView[OKX]}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" Background="{Binding CoinsPricesView[OKX].AskBrush}">
+                                    <TextBlock Text="{Binding CoinsPricesView[OKX].Ask}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <Border Grid.Row="1" Background="{Binding CoinsPricesView[OKX].BidBrush}">
+                                    <TextBlock Text="{Binding CoinsPricesView[OKX].Bid}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Grid>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>-->
+                </controls:DataGridTemplateColumn>
                 <controls:DataGridTemplateColumn Header="KuCoin" >
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

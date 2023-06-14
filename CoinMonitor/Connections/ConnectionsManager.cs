@@ -20,7 +20,7 @@ namespace CoinMonitor.Connections
             _connections.Add(new WhiteBit.Connection());
             _connections.Add(new Bybit.Connection());
             _connections.Add(new Kraken.Connection());
-            //_connections.Add(new OKX.Connection());
+            _connections.Add(new OKX.Connection());
             _connections.Add(new KuCoin.Connection());
 
             var exchangeList = new List<IExchange>();
