@@ -29,13 +29,7 @@ namespace CoinMonitor.WebSockets
         public void Dispose()
         {
             _isDisposed = true;
-            if (_pinger != null)
-            {
-                _pinger.Dispose();
-                _pinger = null;
-            }
-            _connection.Dispose();
-            _connection = null;
+            Stop();
         }
 
         public async Task Send(string text)
@@ -59,8 +53,22 @@ namespace CoinMonitor.WebSockets
                 {
                     Console.WriteLine(e);
                     if (!_isDisposed)
-                        Dispose();
+                        Stop();
                 }
+            }
+        }
+
+        private void Stop()
+        {
+            if (_pinger != null)
+            {
+                _pinger.Dispose();
+                _pinger = null;
+            }
+            if (_connection != null)
+            {
+                _connection.Dispose();
+                _connection = null;
             }
         }
 
