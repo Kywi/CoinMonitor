@@ -17,6 +17,11 @@ namespace CoinMonitor.Crypto.Exchange
             _url = "https://api.binance.com/api/v3/exchangeInfo";
         }
 
+        public static string GetName()
+        {
+            return "Binance";
+        }
+
         public void SetSupportedPairs(List<TradingPair> supportedPairs)
         {
             SupportedPairs = supportedPairs;

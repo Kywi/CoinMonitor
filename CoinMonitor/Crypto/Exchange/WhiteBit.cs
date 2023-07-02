@@ -22,6 +22,11 @@ namespace CoinMonitor.Crypto.Exchange
             SupportedPairs = supportedPairs;
         }
 
+        public static string GetName()
+        {
+            return "WhiteBit";
+        }
+
         public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();

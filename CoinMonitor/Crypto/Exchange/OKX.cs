@@ -23,6 +23,11 @@ namespace CoinMonitor.Crypto.Exchange
             SupportedPairs = supportedCoins;
         }
 
+        public static string GetName()
+        {
+            return "OKX";
+        }
+
         public async Task<HashSet<TradingPair>> RequestForSupportedPairs()
         {
             var client = new HttpClient();

@@ -59,6 +59,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Connections\Models\BidAsk.cs" />
     <Compile Include="Connections\Bybit\DataDto.cs" />
     <Compile Include="Connections\KuCoin\Connection.cs" />
     <Compile Include="Connections\KuCoin\DataDto.cs" />
@@ -68,16 +69,18 @@
     <Compile Include="Connections\Kraken\Subscription.cs" />
     <Compile Include="Connections\Kraken\TickerDto.cs" />
     <Compile Include="Connections\Kraken\WebSocketSubscription.cs" />
+    <Compile Include="PriceCalculations\Models\BidAsk.cs" />
+    <Compile Include="PriceCalculations\Models\Coin.cs" />
     <Compile Include="Connections\OKX\Connection.cs" />
     <Compile Include="Connections\OKX\TickerDto.cs" />
     <Compile Include="Connections\OKX\WebSocketSubscriptionDto.cs" />
+    <Compile Include="PriceCalculations\PriceCalculator.cs" />
     <Compile Include="Connections\WhiteBit\BidAskDto.cs" />
     <Compile Include="Crypto\Exchange\KuCoin.cs" />
     <Compile Include="Crypto\Exchange\Kraken.cs" />
     <Compile Include="Crypto\Exchange\Binance.cs" />
     <Compile Include="Crypto\Exchange\Bybit.cs" />
     <Compile Include="Crypto\Exchange\IExchange.cs" />
-    <Compile Include="Crypto\Exchange\CoinBase.cs" />
     <Compile Include="Crypto\Exchange\TradingPair.cs" />
     <Compile Include="Crypto\Exchange\OKX.cs" />
     <Compile Include="Crypto\Manager.cs" />
@@ -89,7 +92,6 @@
     <Compile Include="Connections\Bybit\WebSocketSubscriptionDto.cs" />
     <Compile Include="Connections\ConnectionsManager.cs" />
     <Compile Include="Connections\IConnectionManager.cs" />
-    <Compile Include="Connections\PriceChangedEventArgs.cs" />
     <Compile Include="Connections\WhiteBit\TickerDto.cs" />
     <Compile Include="Connections\WhiteBit\WebSocketSubscription.cs" />
     <Compile Include="Connections\WhiteBit\Connection.cs" />
@@ -99,6 +101,7 @@
     </Compile>
     <Compile Include="Models\BidAsk.cs" />
     <Compile Include="Models\Coin.cs" />
+    <Compile Include="PriceCalculations\PricesCalculatedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\CollectionsHelpers.cs" />
     <Compile Include="Utils\SemaphoreLocker.cs" />
@@ -155,6 +158,7 @@
   <ItemGroup>
     <None Include="CoinMonitor_TemporaryKey.pfx" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

@@ -4,7 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CoinMonitor.Connections.Models;
 using CoinMonitor.Crypto.Exchange;
+using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,10 +17,13 @@ namespace CoinMonitor.Connections.WhiteBit
     {
         private readonly Manager _websocket;
         private readonly Crypto.Exchange.WhiteBit _whiteBit;
+        private readonly SemaphoreLocker _semaphore;
+        private readonly Dictionary<string, BidAsk> _coinNameBidAskPrices;
 
-        public event EventHandler<PriceChangedEventArgs> PriceUpdate;
         public Connection()
         {
+            _semaphore = new SemaphoreLocker();
+            _coinNameBidAskPrices = new Dictionary<string, BidAsk>();
             var pingMessage = new JObject
             {
                 { "id", 228 },
@@ -45,7 +50,19 @@ namespace CoinMonitor.Connections.WhiteBit
         {
             return _whiteBit;
         }
+        public string GetName()
+        {
+            return Crypto.Exchange.Bybit.GetName();
+        }
 
+        public async Task<Dictionary<string, BidAsk>> GetCoinNameBidAskPrices()
+        {
+            return await _semaphore.LockAsync(() =>
+            {
+                var coinNameBidAskPrices = new Dictionary<string, BidAsk>(_coinNameBidAskPrices);
+                return Task.FromResult(coinNameBidAskPrices);
+            });
+        }
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
             var pairs = _whiteBit.SupportedPairs.Select(pair => $"{pair.Base}_{pair.Quote}").ToList();
@@ -61,7 +78,7 @@ namespace CoinMonitor.Connections.WhiteBit
                 await _websocket.Send(JsonConvert.SerializeObject(subscription));
             }
         }
-        private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
+        private async void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             if (e.Message.Contains("failed"))
                 throw new Exception("Failed to subscribe message=" + e.Message);
@@ -82,7 +99,7 @@ namespace CoinMonitor.Connections.WhiteBit
                 return;
             }
 
-            if (update?.Params == null)
+            if (update.Params == null)
                 return;
 
             if (priceUpdate == null)
@@ -96,7 +113,27 @@ namespace CoinMonitor.Connections.WhiteBit
                 bid = decimal.Parse(priceUpdate.Bid[0][0], NumberStyles.Float);
 
             var coinName = update.Params[2].ToString().Split("_")[0];
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, bid, ask, "WhiteBit"));
+            await _semaphore.LockAsync(() =>
+            {
+                if (_coinNameBidAskPrices.TryGetValue(coinName, out var bidAskValue))
+                {
+                    if (ask.HasValue)
+                        bidAskValue.Ask = ask.Value;
+                    if (bid.HasValue)
+                        bidAskValue.Bid = bid.Value;
+                }
+                else
+                {
+                    bidAskValue = new BidAsk();
+                    if (ask.HasValue)
+                        bidAskValue.Ask = ask.Value;
+                    if (bid.HasValue)
+                        bidAskValue.Bid = bid.Value;
+                    _coinNameBidAskPrices[coinName] = bidAskValue;
+                }
+
+                return Task.FromResult(0);
+            });
         }
     }
 }

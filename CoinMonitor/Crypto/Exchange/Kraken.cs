@@ -23,6 +23,11 @@ namespace CoinMonitor.Crypto.Exchange
             _url = "https://api.kraken.com/0/public/AssetPairs";
         }
 
+        public static string GetName()
+        {
+            return "Kraken";
+        }
+
         public void SetSupportedPairs(List<TradingPair> supportedPairs)
         {
             SupportedPairs = supportedPairs;

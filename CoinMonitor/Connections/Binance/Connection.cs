@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using CoinMonitor.Crypto.Exchange;
 using Newtonsoft.Json;
 using CoinMonitor.WebSockets;
+using CoinMonitor.Utils;
+using System.Threading;
+using CoinMonitor.Connections.Models;
 
 namespace CoinMonitor.Connections.Binance
 {
@@ -12,15 +15,17 @@ namespace CoinMonitor.Connections.Binance
     {
         private readonly Manager _websocket;
         private readonly Crypto.Exchange.Binance _binance;
-
-        public event EventHandler<PriceChangedEventArgs> PriceUpdate;
+        private readonly SemaphoreLocker _semaphore;
+        private readonly Dictionary<string, BidAsk> _coinNameBidAskPrices;
 
         public Connection()
         {
+            _semaphore = new SemaphoreLocker();
             _websocket = new Manager("wss://stream.binance.com:9443/ws", false);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
             _websocket.OnConnected += WebsocketOnOnConnected;
             _binance = new Crypto.Exchange.Binance();
+            _coinNameBidAskPrices = new Dictionary<string, BidAsk>();
         }
 
         public void Dispose()
@@ -38,6 +43,20 @@ namespace CoinMonitor.Connections.Binance
             return _binance;
         }
 
+        public string GetName()
+        {
+            return Crypto.Exchange.Binance.GetName();
+        }
+
+        public async Task<Dictionary<string, BidAsk>> GetCoinNameBidAskPrices()
+        {
+            return await _semaphore.LockAsync(() =>
+            {
+                var coinNameBidAskPrices = new Dictionary<string, BidAsk>(_coinNameBidAskPrices);
+                return Task.FromResult(coinNameBidAskPrices);
+            });
+        }
+
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
         {
             var requestParams = _binance.SupportedPairs.Select(pair => $"{pair.Base.ToLower()}{pair.Quote.ToLower()}@bookTicker").ToList();
@@ -51,7 +70,7 @@ namespace CoinMonitor.Connections.Binance
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
         }
 
-        private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
+        private async void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             TickerDto update;
             try
@@ -68,7 +87,12 @@ namespace CoinMonitor.Connections.Binance
                 return;
 
             var coinName = update.Symbol.Substring(0, update.Symbol.Length - 4);
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Ask, update.Bid, "Binance"));
+
+            await _semaphore.LockAsync(() =>
+            {
+                _coinNameBidAskPrices[coinName] = new BidAsk(update.Ask, update.Bid);
+                return Task.FromResult(0);
+            });
         }
     }
 }

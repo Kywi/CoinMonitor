@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using CoinMonitor.Connections.Models;
 using CoinMonitor.Crypto.Exchange;
+using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
 using Newtonsoft.Json;
 
@@ -11,11 +15,13 @@ namespace CoinMonitor.Connections.OKX
     {
         private readonly Manager _websocket;
         private readonly Crypto.Exchange.OKX _okx;
-
-        public event EventHandler<PriceChangedEventArgs> PriceUpdate;
+        private readonly SemaphoreLocker _semaphore;
+        private readonly Dictionary<string, BidAsk> _coinNameBidAskPrices;
 
         public Connection()
         {
+            _semaphore = new SemaphoreLocker();
+            _coinNameBidAskPrices = new Dictionary<string, BidAsk>();
             _websocket = new Manager("wss://ws.okx.com:8443/ws/v5/public", false);
             _websocket.MessageReceived += WebsocketOnMessageReceived;
             _websocket.OnConnected += WebsocketOnOnConnected;
@@ -35,6 +41,19 @@ namespace CoinMonitor.Connections.OKX
         public IExchange GetExchange()
         {
             return _okx;
+        }
+        public string GetName()
+        {
+            return Crypto.Exchange.OKX.GetName();
+        }
+
+        public async Task<Dictionary<string, BidAsk>> GetCoinNameBidAskPrices()
+        {
+            return await _semaphore.LockAsync(() =>
+            {
+                var coinNameBidAskPrices = new Dictionary<string, BidAsk>(_coinNameBidAskPrices);
+                return Task.FromResult(coinNameBidAskPrices);
+            });
         }
 
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
@@ -57,7 +76,7 @@ namespace CoinMonitor.Connections.OKX
             await _websocket.Send(JsonConvert.SerializeObject(subscription));
         }
 
-        private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
+        private async void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             TickerDto update;
             try
@@ -75,7 +94,11 @@ namespace CoinMonitor.Connections.OKX
 
             var tradingPair = update.Data[0].Symbol;
             var coinName = tradingPair.Substring(0, tradingPair.Length - 5);
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, update.Data[0].Ask, update.Data[0].Bid, "OKX"));
+            await _semaphore.LockAsync(() =>
+            {
+                _coinNameBidAskPrices[coinName] = new BidAsk(update.Data[0].Bid, update.Data[0].Ask);
+                return Task.FromResult(0);
+            });
         }
     }
 }

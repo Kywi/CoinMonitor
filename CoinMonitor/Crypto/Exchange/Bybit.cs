@@ -17,6 +17,11 @@ namespace CoinMonitor.Crypto.Exchange
             _url = "https://api.bybit.com/v5/market/tickers?category=spot";
         }
 
+        public static string GetName()
+        {
+            return "Bybit";
+        }
+
         public void SetSupportedPairs(List<TradingPair> supportedPairs)
         {
             SupportedPairs = supportedPairs;

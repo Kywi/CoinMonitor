@@ -12,7 +12,7 @@
             Quote = quote;
         }
 
-        public readonly override int GetHashCode()
+        public override int GetHashCode()
         {
             return Base.GetHashCode();
         }

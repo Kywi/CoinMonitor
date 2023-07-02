@@ -18,6 +18,11 @@ namespace CoinMonitor.Crypto.Exchange
             _url = "https://api.kucoin.com/api/v2/symbols";
         }
 
+        public static string GetName()
+        {
+            return "KuCoin";
+        }
+
         public void SetSupportedPairs(List<TradingPair> supportedPairs)
         {
             SupportedPairs = supportedPairs;

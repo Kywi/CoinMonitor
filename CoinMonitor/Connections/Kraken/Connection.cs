@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using CoinMonitor.Connections.Models;
 using CoinMonitor.Crypto.Exchange;
+using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,10 +15,13 @@ namespace CoinMonitor.Connections.Kraken
     {
         private readonly Manager _websocket;
         private readonly Crypto.Exchange.Kraken _kraken;
+        private readonly SemaphoreLocker _semaphore;
+        private readonly Dictionary<string, BidAsk> _coinNameBidAskPrices;
 
-        public event EventHandler<PriceChangedEventArgs> PriceUpdate;
         public Connection()
         {
+            _semaphore = new SemaphoreLocker();
+            _coinNameBidAskPrices = new Dictionary<string, BidAsk>();
             var pingMessage = new JObject
             {
                 { "event", "ping" },
@@ -31,6 +35,20 @@ namespace CoinMonitor.Connections.Kraken
         public void Dispose()
         {
             _websocket.Dispose();
+        }
+
+        public string GetName()
+        {
+            return Crypto.Exchange.Kraken.GetName();
+        }
+
+        public async Task<Dictionary<string, BidAsk>> GetCoinNameBidAskPrices()
+        {
+            return await _semaphore.LockAsync(() =>
+            {
+                var coinNameBidAskPrices = new Dictionary<string, BidAsk>(_coinNameBidAskPrices);
+                return Task.FromResult(coinNameBidAskPrices);
+            });
         }
 
         private async void WebsocketOnOnConnected(object sender, EventArgs e)
@@ -56,7 +74,7 @@ namespace CoinMonitor.Connections.Kraken
             return _kraken;
         }
 
-        private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
+        private async void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             if (e.Message[0] == '{')
                 return;
@@ -86,7 +104,26 @@ namespace CoinMonitor.Connections.Kraken
                 bid = update.Bid[0][0];
 
             coinName = coinName.Split('/')[0];
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, bid, ask, "Kraken"));
+            await _semaphore.LockAsync(() =>
+            {
+                if (_coinNameBidAskPrices.TryGetValue(coinName, out var bidAskValue))
+                {
+                    if (ask.HasValue)
+                        bidAskValue.Ask = ask.Value;
+                    if (bid.HasValue)
+                        bidAskValue.Bid = bid.Value;
+                }
+                else
+                {
+                    bidAskValue = new BidAsk();
+                    if (ask.HasValue)
+                        bidAskValue.Ask = ask.Value;
+                    if (bid.HasValue)
+                        bidAskValue.Bid = bid.Value;
+                    _coinNameBidAskPrices[coinName] = bidAskValue;
+                }
+                return Task.FromResult(0);
+            });
         }
     }
 }

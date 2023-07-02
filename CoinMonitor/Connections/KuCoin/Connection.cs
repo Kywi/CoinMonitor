@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using CoinMonitor.Connections.Kraken;
+using CoinMonitor.Connections.Models;
 using CoinMonitor.Crypto.Exchange;
 using CoinMonitor.Utils;
 using CoinMonitor.WebSockets;
@@ -20,12 +19,13 @@ namespace CoinMonitor.Connections.KuCoin
         private List<Task> _receiveTasks;
         private List<List<WebSocketSubscription>> _subscriptions;
         private SemaphoreLocker _semaphore;
+        private readonly Dictionary<string, BidAsk> _coinNameBidAskPrices;
         private readonly Crypto.Exchange.KuCoin _kuCoin;
         private int _subscriptionIndex = 0;
 
-        public event EventHandler<PriceChangedEventArgs> PriceUpdate;
         public Connection()
         {
+            _coinNameBidAskPrices = new Dictionary<string, BidAsk>();
             _semaphore = new SemaphoreLocker();
             _subscriptions = new List<List<WebSocketSubscription>>();
             _websockets = new List<Manager>();
@@ -37,6 +37,20 @@ namespace CoinMonitor.Connections.KuCoin
         {
             foreach (var websocket in _websockets)
                 websocket.Dispose();
+        }
+
+        public string GetName()
+        {
+            return Crypto.Exchange.KuCoin.GetName();
+        }
+
+        public async Task<Dictionary<string, BidAsk>> GetCoinNameBidAskPrices()
+        {
+            return await _semaphore.LockAsync(() =>
+            {
+                var coinNameBidAskPrices = new Dictionary<string, BidAsk>(_coinNameBidAskPrices);
+                return Task.FromResult(coinNameBidAskPrices);
+            });
         }
 
         public async Task StartAsync()
@@ -58,8 +72,8 @@ namespace CoinMonitor.Connections.KuCoin
 
             _websockets.Add(InitWebsocket(endpoint, token, pingMessage, pingInterval));
             _subscriptions.Add(new List<WebSocketSubscription>());
-            int id = 228;
-            int subscriptionCount = 0;
+            var id = 228;
+            var subscriptionCount = 0;
             foreach (var coinPair in coinPairs)
             {
                 id++;
@@ -88,7 +102,7 @@ namespace CoinMonitor.Connections.KuCoin
             }
 
             foreach (var websocket in _websockets)
-                _receiveTasks.Add(websocket.Start());
+                _receiveTasks.Add(Task.Run(websocket.Start));
             await Task.WhenAll(_receiveTasks);
         }
 
@@ -97,7 +111,7 @@ namespace CoinMonitor.Connections.KuCoin
             return _kuCoin;
         }
 
-        private void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
+        private async void WebsocketOnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             TickerDto update;
             try
@@ -121,7 +135,26 @@ namespace CoinMonitor.Connections.KuCoin
             if (update.DataDto.Bid != null)
                 bid = update.DataDto.Bid[0][0];
 
-            PriceUpdate?.Invoke(this, new PriceChangedEventArgs(coinName, bid, ask, "KuCoin"));
+            await _semaphore.LockAsync(() =>
+            {
+                if (_coinNameBidAskPrices.TryGetValue(coinName, out var bidAskValue))
+                {
+                    if (ask.HasValue)
+                        bidAskValue.Ask = ask.Value;
+                    if (bid.HasValue)
+                        bidAskValue.Bid = bid.Value;
+                }
+                else
+                {
+                    bidAskValue = new BidAsk();
+                    if (ask.HasValue)
+                        bidAskValue.Ask = ask.Value;
+                    if (bid.HasValue)
+                        bidAskValue.Bid = bid.Value;
+                    _coinNameBidAskPrices[coinName] = bidAskValue;
+                }
+                return Task.FromResult(0);
+            });
         }
 
         private Manager InitWebsocket(string endpoint, string token, string pingMessage, double pingInterval)
